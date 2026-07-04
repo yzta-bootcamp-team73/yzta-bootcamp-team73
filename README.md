@@ -48,10 +48,16 @@ Takım 73
 
 # Sprint 1
 
+- **Daily Scrum**: Daily Scrum toplantılarının zamansal sebeplerden ötürü Slack üzerinden yapılmasına karar verilmiştir. Daily Scrum toplantısı örneği jpeg veya word olarak Readme'de tarafımızdan paylaşılmaktadır: [Sprint 1 Daily Scrum Chats](yzta-bootcamp%20-%2073.%20takim.docx)
+
 - **Sprint board update**: Sprint board ekran görüntüleri: 
 ![Backlog 1](Resim1.png) 
 ![Backlog 2](Resim2.png) 
 ![Backlog 3](Resim3.png)
+
+- **Ürün Durumu**: Ekran görüntüleri:
+![Ürün Ekran Görüntüsü 1](Urun1.jpeg)
+![Ürün Ekran Görüntüsü 2](Urun2.jpeg)
 
 - **Sprint Review**: 
 Alınan kararlar: Veritabanı oluşturması email ile toplanacak veriler için gerekli görülmüştür. Fakat bir yandan da veritabanı form sayfası için gerekli olmamıştır. O sebeple PBI bir sonraki sprint'e aktarılmıştır. Çıkan ürünün çalışmasında ve testlerinde bir problem görülmemiştir. Ekstra koyulması gereken özellikler belirlenmiştir. Sprint Review katılımcıları: Burak Koçaş, Ceylan Ulusoy, Elif Fırıncı, Rabia Başak, Adem Yıldız
