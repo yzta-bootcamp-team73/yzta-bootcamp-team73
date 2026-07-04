@@ -48,7 +48,7 @@ Takım 73
 
 # Sprint 1
 
-- **Daily Scrum**: Daily Scrum toplantılarının zamansal sebeplerden ötürü Slack üzerinden yapılmasına karar verilmiştir. Daily Scrum toplantısı örneği jpeg veya word olarak Readme'de tarafımızdan paylaşılmaktadır: [Sprint 1 Daily Scrum Chats](/ProjectManagement/yzta-bootcamp-73.takim.docx)
+- **Daily Scrum**: Daily Scrum toplantılarının zamansal sebeplerden ötürü Slack üzerinden yapılmasına karar verilmiştir. Daily Scrum toplantısı örneği word olarak Readme'de tarafımızdan paylaşılmaktadır: [Sprint 1 Daily Scrum Chats](/ProjectManagement/yzta-bootcamp-73.takim.docx)
 
 - **Sprint board update**: Sprint board ekran görüntüleri: 
 ![Backlog 1](/ProjectManagement/Resim1.png) 
