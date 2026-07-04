@@ -62,12 +62,12 @@ Takım 73
 ![Ürün Ekran Görüntüsü 2](/ProjectManagement/urun2.jpeg)
 
 - **Sprint Review**: 
-Alınan kararlar: Veritabanı oluşturması email ile toplanacak veriler için gerekli görülmüştür. Fakat bir yandan da veritabanı form sayfası için gerekli olmamıştır. O sebeple PBI bir sonraki sprint'e aktarılmıştır. Çıkan ürünün çalışmasında ve testlerinde bir problem görülmemiştir. Ekstra koyulması gereken özellikler belirlenmiştir. Sprint Review katılımcıları: Burak Koçaş, Ceylan Ulusoy, Elif Fırıncı, Rabia Başak, Adem Yıldız
+Alınan kararlar: Sprint planlamaları için Miro kullanılması uygun görülmüştür. Ürün adı için Kivona ismi belirlenmiştir. Product Backlog ve Sprint 1 Backlog Miro üzerinde oluşturulmuş, GitHub repository kurulmuştur. Ürün Durumu Wireframe ile oluşturulmuştur. Readme’ye konulacak olan ürün durumu ekran fotoğrafları ve belgelerde herkes hemfikir olmuştur. Ürünün koyulması gereken açıklama, özellikler, hedef kitle ve backlog kısımları belirlenmiştir. Sprint Review katılımcıları: Burak Koçaş, Ceylan Ulusoy, Elif Fırıncı, Rabia Başak, Adem Yıldız
 
 - **Sprint Retrospective:**
-  - Takım içindeki görev dağılımıyla ilgili düzenleme yapılması kararı alınmıştır.
-  - Tahmin puanları gözden geçirilmeli ve sprint planlama toplantılarında gerekli geri bildirimlerin developer'lar tarafından verildiğine emin olunmalı.
-  - Unit test'ler için ayrılan efor/saat arttırılmalı.
+  - Ekibin dönemsel yoğunluğundan ötürü bu sprintte kodlamadan ziyade altyapı ve mimari planlamaya odaklanıldı. Ancak, Sprint 2 ile birlikte yoğun kodlama fazına geçileceği için görevlerin tahmin puanlarının çok daha dikkatli hesaplanması ve kişisel yoğunlukların göz önünde bulundurulması kararlaştırıldı.
+  - Takım içindeki görev dağılımı bu sprinte özel yapılmıştır. Diğer sprintler için yeni bir düzenleme yapılması kararı alınmıştır.
+  - Sprint planlama toplantılarında gerekli geri bildirimlerin ekip üyeleri tarafından verildiğine emin olunmalı.
 
 ---
 
