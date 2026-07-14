@@ -13,10 +13,12 @@ import {
 } from "lucide-react";
 import { Github } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="h-screen w-full overflow-hidden flex flex-col md:flex-row antialiased selection:bg-accent selection:text-accent-foreground">
@@ -58,10 +60,23 @@ export default function RegisterPage() {
           </div>
 
           {/* GitHub Auth Button */}
-          <button className="w-full flex items-center justify-center gap-3 bg-card border border-border rounded-lg py-3 px-4 hover:bg-secondary transition-all active:scale-[0.98]">
+          <button 
+            onClick={async () => {
+              setIsLoading(true);
+              const supabase = createClient();
+              await supabase.auth.signInWithOAuth({
+                provider: "github",
+                options: {
+                  redirectTo: `${window.location.origin}/auth/callback`,
+                },
+              });
+            }}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-3 bg-card border border-border rounded-lg py-3 px-4 hover:bg-secondary transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Github className="w-5 h-5 text-foreground" />
             <span className="text-sm font-medium text-foreground">
-              GitHub ile Kayıt Ol
+              {isLoading ? "Yönlendiriliyor..." : "GitHub ile Kayıt Ol"}
             </span>
           </button>
 
