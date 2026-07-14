@@ -11,9 +11,10 @@ import {
   Menu,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { createClient } from "@/lib/supabase/client"
 import {
   Sheet,
   SheetContent,
@@ -29,8 +30,19 @@ const navLinks = [
   { href: "/profile", label: "Profilim", icon: User },
 ]
 
-function SidebarContent() {
+function SidebarContent({ user }: { user: any }) {
   const pathname = usePathname()
+  
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    window.location.href = "/login"
+  }
+
+  const avatarUrl = user?.user_metadata?.avatar_url;
+  const fullName = user?.user_metadata?.full_name || "Kullanıcı";
+  const userName = user?.user_metadata?.user_name ? `@${user.user_metadata.user_name}` : "@kullanici";
+  const initials = fullName.substring(0, 2).toUpperCase();
 
   return (
     <div className="flex h-full flex-col">
@@ -70,17 +82,18 @@ function SidebarContent() {
       <div className="mt-auto border-t border-border p-4">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarFallback>KU</AvatarFallback>
+            {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate text-foreground">
-              Kullanıcı
+              {fullName}
             </p>
             <p className="text-xs text-muted-foreground truncate">
-              @kullanici
+              {userName}
             </p>
           </div>
-          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive">
+          <Button onClick={handleLogout} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive">
             <LogOut className="size-4" />
             <span className="sr-only">Çıkış Yap</span>
           </Button>
@@ -90,15 +103,15 @@ function SidebarContent() {
   )
 }
 
-export default function Sidebar() {
+export default function Sidebar({ user }: { user?: any }) {
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-border bg-card">
-      <SidebarContent />
+      <SidebarContent user={user} />
     </aside>
   )
 }
 
-export function MobileSidebar() {
+export function MobileSidebar({ user }: { user?: any }) {
   return (
     <Sheet>
       <SheetTrigger
@@ -113,7 +126,7 @@ export function MobileSidebar() {
         <SheetHeader className="sr-only">
           <SheetTitle>Navigasyon Menüsü</SheetTitle>
         </SheetHeader>
-        <SidebarContent />
+        <SidebarContent user={user} />
       </SheetContent>
     </Sheet>
   )

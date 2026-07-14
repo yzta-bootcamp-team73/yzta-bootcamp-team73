@@ -1,6 +1,7 @@
 import { Sparkles, FolderGit2 } from "lucide-react";
 import { Github } from "@/components/shared/icons";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,7 +16,15 @@ import { Separator } from "@/components/ui/separator"
 const skills = ["React", "Next.js", "Python", "TypeScript", "TailwindCSS", "Node.js"]
 const lookingFor = ["UI/UX Tasarımcı", "Veri Bilimci"]
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const avatarUrl = user?.user_metadata?.avatar_url;
+  const fullName = user?.user_metadata?.full_name || "Kullanıcı";
+  const userName = user?.user_metadata?.user_name ? `@${user.user_metadata.user_name}` : "@kullanici";
+  const initials = fullName.substring(0, 2).toUpperCase();
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -33,15 +42,16 @@ export default function ProfilePage() {
             {/* User Info */}
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
               <Avatar size="lg" className="size-20">
-                <AvatarFallback className="text-xl">KU</AvatarFallback>
+                {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+                <AvatarFallback className="text-xl">{initials}</AvatarFallback>
               </Avatar>
               <div className="text-center sm:text-left">
                 <h2 className="text-xl font-bold text-foreground">
-                  Demo Kullanıcı
+                  {fullName}
                 </h2>
-                <p className="text-sm text-muted-foreground">@demo_kullanici</p>
+                <p className="text-sm text-muted-foreground">{userName}</p>
                 <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                  Full-stack geliştirici | AI &amp; ML meraklısı | Hackathon tutkunu
+                  Yeni üye | Beceriler yakında AI tarafından analiz edilecek.
                 </p>
                 <div className="mt-3">
                   <Badge>Geliştirici</Badge>

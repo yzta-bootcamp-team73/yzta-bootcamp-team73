@@ -1,9 +1,11 @@
 "use client"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MobileSidebar } from "@/components/shared/sidebar"
 
-export default function Navbar() {
+export default function Navbar({ user }: { user: any }) {
+  const avatarUrl = user?.user_metadata?.avatar_url;
+  const initials = user?.user_metadata?.full_name?.substring(0, 2).toUpperCase() || "KU";
   return (
     <header className="flex h-16 shrink-0 items-center border-b border-border bg-card px-4 md:px-6">
       {/* Mobile: hamburger + logo */}
@@ -23,7 +25,8 @@ export default function Navbar() {
       {/* User avatar (always visible) */}
       <div className="flex items-center gap-3">
         <Avatar>
-          <AvatarFallback>KU</AvatarFallback>
+          {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+          <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
       </div>
     </header>
