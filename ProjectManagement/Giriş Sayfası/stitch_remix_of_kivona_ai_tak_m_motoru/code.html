@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html class="light" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kivona - Giriş</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#4b67d3",
+                        "outline-variant": "#c3c6d8",
+                        "on-tertiary-fixed-variant": "#1a3ca8",
+                        "on-surface-variant": "#424656",
+                        "surface-container-highest": "#e0e3e5",
+                        "secondary": "#5e5d66",
+                        "tertiary-fixed-dim": "#b8c4ff",
+                        "outline": "#737687",
+                        "surface-container-low": "#f2f4f6",
+                        "inverse-surface": "#2d3133",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#0052dd",
+                        "on-secondary-container": "#62626a",
+                        "on-primary-fixed": "#00174c",
+                        "on-primary-fixed-variant": "#003da9",
+                        "on-error": "#ffffff",
+                        "surface-container": "#eceef0",
+                        "on-primary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-high": "#e6e8ea",
+                        "on-tertiary-fixed": "#001453",
+                        "surface-bright": "#f7f9fb",
+                        "tertiary": "#304db9",
+                        "primary-container": "#0f62fe",
+                        "secondary-container": "#e1dee9",
+                        "on-surface": "#191c1e",
+                        "inverse-primary": "#b4c5ff",
+                        "surface": "#f7f9fb",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "tertiary-fixed": "#dde1ff",
+                        "background": "#f7f9fb",
+                        "on-error-container": "#93000a",
+                        "primary": "#004ccd",
+                        "surface-dim": "#d8dadc",
+                        "secondary-fixed": "#e4e1eb",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#1b1b22",
+                        "surface-variant": "#e0e3e5",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-secondary-fixed-variant": "#46464e",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#c7c5cf",
+                        "on-primary-container": "#f3f3ff",
+                        "on-tertiary-container": "#f3f3ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "xl": "80px",
+                        "xs": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "64px",
+                        "lg": "48px",
+                        "md": "24px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "display": ["IBM Plex Sans", "sans-serif"],
+                        "headline-lg": ["IBM Plex Sans", "sans-serif"],
+                        "headline-md": ["IBM Plex Sans", "sans-serif"],
+                        "body-lg": ["IBM Plex Sans", "sans-serif"],
+                        "body-md": ["IBM Plex Sans", "sans-serif"],
+                        "label-md": ["IBM Plex Sans", "sans-serif"],
+                        "label-sm": ["IBM Plex Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-subtle-pattern {
+            background-image: radial-gradient(circle, #e0e3e5 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md h-screen w-full overflow-hidden flex flex-col md:flex-row antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Left Side: Interactive Form Canvas -->
+<main class="w-full md:w-1/2 lg:w-[45%] h-full flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop overflow-y-auto z-10 relative bg-surface-container-lowest">
+<div class="w-full max-w-md flex flex-col gap-8">
+<!-- Brand Anchor -->
+<div class="text-center md:text-left">
+<span class="font-display text-[40px] font-bold text-primary tracking-tight">Kivona</span>
+</div>
+<!-- Login / Signup Toggle -->
+<div class="bg-surface-container p-1 rounded-lg flex items-center border border-outline-variant">
+<button class="flex-1 py-2 px-4 rounded-md bg-surface-container-lowest shadow-sm text-primary font-label-md transition-all text-center border border-outline-variant/30">
+                    Giriş Yap
+                </button>
+<button class="flex-1 py-2 px-4 rounded-md text-on-surface-variant font-label-md hover:text-on-surface transition-colors text-center">
+                    Kayıt Ol
+                </button>
+</div>
+<!-- Header -->
+<div class="flex flex-col gap-2 text-center md:text-left">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Tekrar Hoş Geldin</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Macera kaldığı yerden devam ediyor.</p>
+</div>
+<!-- Social Auth -->
+<button class="w-full flex items-center justify-center gap-3 bg-white border border-outline-variant rounded-lg py-3 px-4 hover:bg-surface-container-low transition-all active:scale-[0.98]">
+<img alt="GitHub Logo" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhDbwJw-B8wOUjoH_fo13HDZEFCB0lio0NsRrLl5_bY9HnPKAt6Q7srtqdhVc8Wfy4nEZ8iZScum49FKSmJOrXWdzjziz8XKITSTi2W4dSbXhiE-WyeCf0CaMPF8qSSfLnaTDtFZgRNxofLji4tsF0rP1u8Qr6lOJUdqC5b0q_DEQJM7sTS4dCappASAeB2CDjDKZEVrG9mos-6EE79lngmfQLHkGAwxnsyMNCmjLqtuDtE8Nx8m6B1zw_TAZJMqfg0IOBMemXQEQ"/>
+<span class="font-label-md text-on-surface">GitHub ile Devam Et</span>
+</button>
+<!-- Divider -->
+<div class="flex items-center gap-4 w-full">
+<div class="h-px bg-outline-variant flex-1"></div>
+<span class="font-label-sm text-on-surface-variant uppercase tracking-widest">veya</span>
+<div class="h-px bg-outline-variant flex-1"></div>
+</div>
+<!-- Form -->
+<form class="flex flex-col gap-5 w-full" onsubmit="event.preventDefault();">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-on-surface-variant ml-1" for="email">E-posta</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline">mail</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-lg py-3 pl-12 pr-4 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant/50" id="email" placeholder="ornek@kivona.dev" type="email"/>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between ml-1">
+<label class="font-label-md text-on-surface-variant" for="password">Şifre</label>
+<a class="font-label-sm text-primary hover:underline transition-colors" href="#">Şifremi Unuttum?</a>
+</div>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline">lock</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-lg py-3 pl-12 pr-12 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant/50" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 text-outline hover:text-on-surface transition-colors focus:outline-none" type="button">
+<span class="material-symbols-outlined">visibility_off</span>
+</button>
+</div>
+</div>
+<button class="w-full mt-2 bg-primary py-3.5 px-4 rounded-lg font-label-md text-on-primary hover:bg-on-primary-fixed-variant transition-all active:scale-[0.98] shadow-md shadow-primary/20" type="submit">
+<span class="flex items-center justify-center gap-2">
+                        E-posta ile Devam Et
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</span>
+</button>
+</form>
+<!-- Footer Text -->
+<p class="text-center font-body-md text-on-surface-variant mt-4">
+                Hesabın yok mu? <a class="text-primary font-label-md hover:underline underline-offset-4" href="#">Hemen Kayıt Ol</a>
+</p>
+</div>
+</main>
+<!-- Right Side: Visual Branding (Hidden on mobile) -->
+<aside class="hidden md:flex w-1/2 lg:w-[55%] h-full relative overflow-hidden bg-surface items-center justify-center p-12">
+<!-- Tech Pattern Overlay -->
+<div class="absolute inset-0 bg-subtle-pattern opacity-40"></div>
+<!-- Subtle Ambient Gradients -->
+<div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-fixed/30 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
+<div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-tertiary-fixed/20 blur-[80px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
+<div class="relative z-10 flex flex-col items-start gap-12 max-w-lg">
+<!-- Copy -->
+<div class="flex flex-col gap-6">
+<h2 class="font-headline-lg text-[48px] leading-[1.1] text-on-surface tracking-tight font-bold">
+                    Geleceğin takımını kurmak için <span class="text-primary">ilk adımı at.</span>
+</h2>
+<p class="font-body-lg text-on-surface-variant max-w-md">
+                    AI destekli eşleşme motoru ile yeteneklerine en uygun ekibi bul, hackathonlarda zirveye oyna.
+                </p>
+</div>
+<!-- Match Card Preview -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-xl shadow-surface-dim/50 w-full max-w-md">
+<div class="flex items-start justify-between mb-8">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-primary-fixed">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4E4cD_BRWNLjm5aw2l3n3nHnSp7AwPCWM4kAEw-7-0evwfJ0k1Vc9bUwqhGQZ1QEuz_ulnROYrdustGpALtWQP9W-7A5htdbEQ8CTTkjz401YrO6uhJtZR0IfPb35C1wE-S4g2GkHDn1RHFK5GJEgSLYbRd1eZmLWU5iNTzVx6BRPwANOxt07AwnXr_hm6q2q-s0ZxCSwlcHTwvOy_fDBlNdH183m-DGbDLmr22wq6rd2_EIMVKC37vjUuCTa1W6Srnp6PO3Mol0"/>
+</div>
+<div>
+<h3 class="font-label-md text-on-surface font-bold">Zeynep Yılmaz</h3>
+<p class="font-body-md text-sm text-on-surface-variant flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span> Frontend Geliştirici
+                            </p>
+</div>
+</div>
+<!-- Match Score -->
+<div class="bg-primary-fixed border border-primary-fixed-dim rounded-full px-3 py-1 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-on-primary-fixed">psychology</span>
+<span class="font-label-sm text-on-primary-fixed font-bold">%98 Uyum</span>
+</div>
+</div>
+<!-- Skills -->
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-container border border-outline-variant rounded-md px-3 py-1 font-label-sm text-on-surface-variant">React</span>
+<span class="bg-surface-container border border-outline-variant rounded-md px-3 py-1 font-label-sm text-on-surface-variant">Three.js</span>
+<span class="bg-surface-container border border-outline-variant rounded-md px-3 py-1 font-label-sm text-on-surface-variant">Tailwind</span>
+</div>
+</div>
+</div>
+</aside>
+</body></html>
