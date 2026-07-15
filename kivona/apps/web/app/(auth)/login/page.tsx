@@ -204,7 +204,7 @@ export default function LoginPage() {
             </h2>
             <p className="text-lg text-muted-foreground max-w-md">
               AI destekli eşleşme motoru ile yeteneklerine en uygun ekibi bul,
-              hackathonlarda zirveye oyna.
+              etkinliklerde zirveye oyna.
             </p>
           </div>
 

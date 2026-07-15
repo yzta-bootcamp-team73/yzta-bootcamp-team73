@@ -262,7 +262,7 @@ export default function RegisterPage() {
               },
               {
                 icon: "🏆",
-                title: "Hackathon Keşfi",
+                title: "Etkinlik Keşfi",
                 desc: "Güncel yarışmaları tek panoda toplar",
               },
             ].map((feature) => (

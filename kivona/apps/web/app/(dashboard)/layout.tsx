@@ -1,6 +1,7 @@
 import Sidebar from "@/components/shared/sidebar"
 import Navbar from "@/components/shared/navbar"
 import { createClient } from "@/lib/supabase/server"
+import { NameOnboarding } from "@/components/shared/name-onboarding"
 
 export default async function DashboardLayout({
   children,
@@ -11,6 +12,7 @@ export default async function DashboardLayout({
   const { data: { user } } = await supabase.auth.getUser();
   return (
     <div className="flex h-screen">
+      <NameOnboarding user={user} />
       {/* Desktop sidebar — fixed left */}
       <Sidebar user={user} />
 

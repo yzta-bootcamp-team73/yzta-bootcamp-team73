@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kivona — AI Destekli Hackathon Takım Eşleştirme Platformu",
+  title: "Kivona — AI Destekli Takım Eşleştirme Platformu",
   description:
-    "AI destekli eşleşme motoru ile yeteneklerine en uygun ekibi bul, hackathonlarda zirveye oyna. GitHub profilini analiz et, akıllı eşleştirme ile takımını kur.",
-  keywords: ["hackathon", "takım eşleştirme", "AI", "GitHub", "kivona"],
+    "AI destekli eşleşme motoru ile yeteneklerine en uygun ekibi bul, etkinliklerde zirveye oyna. GitHub profilini analiz et, akıllı eşleştirme ile takımını kur.",
+  keywords: ["hackathon", "bootcamp", "datathon", "takım eşleştirme", "AI", "GitHub", "kivona"],
 };
 
 export default function RootLayout({

@@ -104,7 +104,7 @@ export default function DiscoverPage() {
           Yarışmaları Keşfet
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Dünya genelindeki hackathon ve yarışmaları keşfet, takımını kur ve katıl.
+          Dünya genelindeki etkinlik ve yarışmaları keşfet, takımını kur ve katıl.
         </p>
       </div>
 

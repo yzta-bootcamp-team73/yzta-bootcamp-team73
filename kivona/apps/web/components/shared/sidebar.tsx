@@ -40,8 +40,9 @@ function SidebarContent({ user }: { user: any }) {
   }
 
   const avatarUrl = user?.user_metadata?.avatar_url;
-  const fullName = user?.user_metadata?.full_name || "Kullanıcı";
-  const userName = user?.user_metadata?.user_name ? `@${user.user_metadata.user_name}` : "@kullanici";
+  const userNameStr = user?.user_metadata?.user_name || "kullanici";
+  const fullName = user?.user_metadata?.full_name || userNameStr;
+  const userName = `@${userNameStr}`;
   const initials = fullName.substring(0, 2).toUpperCase();
 
   return (

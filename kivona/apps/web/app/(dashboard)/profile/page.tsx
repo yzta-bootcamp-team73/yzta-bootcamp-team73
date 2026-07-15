@@ -2,6 +2,7 @@ import { Sparkles, FolderGit2 } from "lucide-react";
 import { Github } from "@/components/shared/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { createClient } from "@/lib/supabase/server"
+import { EditNameDialog } from "@/components/shared/edit-name-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,8 +22,9 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   const avatarUrl = user?.user_metadata?.avatar_url;
-  const fullName = user?.user_metadata?.full_name || "Kullanıcı";
-  const userName = user?.user_metadata?.user_name ? `@${user.user_metadata.user_name}` : "@kullanici";
+  const userNameStr = user?.user_metadata?.user_name || "kullanici";
+  const fullName = user?.user_metadata?.full_name || userNameStr;
+  const userName = `@${userNameStr}`;
   const initials = fullName.substring(0, 2).toUpperCase();
 
   return (
@@ -46,9 +48,12 @@ export default async function ProfilePage() {
                 <AvatarFallback className="text-xl">{initials}</AvatarFallback>
               </Avatar>
               <div className="text-center sm:text-left">
-                <h2 className="text-xl font-bold text-foreground">
-                  {fullName}
-                </h2>
+                <div className="flex items-center justify-center sm:justify-start">
+                  <h2 className="text-xl font-bold text-foreground">
+                    {fullName}
+                  </h2>
+                  <EditNameDialog user={user} />
+                </div>
                 <p className="text-sm text-muted-foreground">{userName}</p>
                 <p className="mt-2 text-sm text-muted-foreground max-w-md">
                   Yeni üye | Beceriler yakında AI tarafından analiz edilecek.

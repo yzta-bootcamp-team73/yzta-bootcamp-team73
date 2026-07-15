@@ -131,7 +131,7 @@ function HeroSection() {
         {/* Eyebrow */}
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-white/70 px-4 py-1.5 text-sm font-medium text-muted-foreground backdrop-blur-sm">
           <Sparkles className="size-3.5 text-primary" />
-          AI Destekli Hackathon Platformu
+          AI Destekli Takım Eşleştirme Platformu
         </div>
 
         {/* Headline */}
@@ -143,8 +143,7 @@ function HeroSection() {
 
         {/* Subtitle */}
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-          Kivona, AI destekli eşleşme motoru ile GitHub profilini analiz eder,
-          yeteneklerine en uygun hackathon takım arkadaşlarını bulur.
+          Kivona, AI destekli eşleşme motoru ile GitHub profilini analiz eder, yeteneklerine en uygun takım arkadaşlarını bulur.
         </p>
 
         {/* CTA Buttons */}
@@ -184,7 +183,7 @@ const FEATURES = [
     icon: Brain,
     title: "AI Profil Analizi",
     description:
-      "GitHub repolarını analiz ederek güçlü yönlerini, kullandığın teknolojileri ve hackathon rolünü belirler.",
+      "GitHub repolarını analiz ederek güçlü yönlerini, kullandığın teknolojileri ve etkinliklerdeki ideal rolünü belirler.",
   },
   {
     icon: Users,
@@ -194,7 +193,7 @@ const FEATURES = [
   },
   {
     icon: Trophy,
-    title: "Hackathon Keşfi",
+    title: "Etkinlik Keşfi",
     description:
       "Devpost, Kaggle ve diğer platformlardaki güncel yarışmaları tek panoda toplar.",
   },
@@ -219,7 +218,7 @@ function FeaturesSection() {
             Kivona ile Neler Yapabilirsin?
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Hackathon yolculuğunun her adımında yanında.
+            Proje ve yarışma yolculuğunun her adımında yanında.
           </p>
         </div>
 
@@ -273,7 +272,7 @@ const STEPS = [
     step: "3",
     title: "Takımını Kur",
     description:
-      "Eşleştiğin kişilerle takımını oluştur ve hackathon'a katıl.",
+      "Eşleştiğin kişilerle takımını oluştur ve etkinliğe katıl.",
   },
 ];
 
@@ -293,7 +292,7 @@ function HowItWorksSection() {
             Nasıl Çalışır?
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Üç basit adımda hackathon takımını kur.
+            Üç basit adımda rüya takımını kur.
           </p>
         </div>
 
@@ -336,7 +335,7 @@ function CtaSection() {
 
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center lg:px-8">
         <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-          Hackathon macerana
+          Bu maceraya bugün
           <br />
           <span className="text-kivona-blue-dim">bugün başla.</span>
         </h2>
