@@ -195,6 +195,10 @@ export default function RegisterPage() {
             {/* Submit Button */}
             <Button
               type="submit"
+              onClick={(e) => {
+                e.preventDefault();
+                alert("AI tabanlı eşleşme motorunun düzgün çalışabilmesi için MVP (Beta) sürümünde sadece GitHub hesaplarıyla kayıt alınmaktadır.");
+              }}
               className="w-full mt-2 py-6 text-sm font-medium shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.98]"
               size="lg"
             >
