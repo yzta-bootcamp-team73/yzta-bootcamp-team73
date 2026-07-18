@@ -77,9 +77,9 @@ Takım 73
 
 - **Sprint board update**: Sprint board ekran görüntüleri:
 
-![Backlog 1](/ProjectManagement/Sprint2/SprintBoard/Miro.png)
-![Backlog 2](/ProjectManagement/Sprint2/SprintBoard/Miro2.png)
-![Backlog 3](/ProjectManagement/Sprint2/SprintBoard/Miro3.png)
+![Backlog 1](/ProjectManagement/Sprint2/SprintBoard/Miro2.png)
+![Backlog 2](/ProjectManagement/Sprint2/SprintBoard/Miro3.png)
+![Backlog 3](/ProjectManagement/Sprint2/SprintBoard/Miro.png)
 
 - **Ürün Durumu**: Ekran görüntüleri:
 
@@ -88,11 +88,17 @@ Bu sprintte uygulamanın altyapısı ve kodlama fazı büyük ölçüde tamamlan
 ![Ürün Ekran Görüntüsü 1](/ProjectManagement/Sprint2/Resim1.png) <br>
 
 - **Frontend UI Tamamlandı**: Giriş/Kayıt sayfaları ve Dashboard (Profil, Keşfet panoları) Next.js ve Tailwind CSS ile kodlandı.
-  ![Ürün Ekran Görüntüsü 2](/ProjectManagement/Sprint2/Resim2.png) <br>
+
+![Ürün Ekran Görüntüsü 2](/ProjectManagement/Sprint2/Resim2.png) <br>
+
 - **Kimlik Doğrulama (Auth)**: Kullanıcıların GitHub hesaplarıyla uygulamaya güvenli şekilde giriş yapabilmesi (OAuth) için Supabase SSR (Server-Side Rendering) middleware yapısı kuruldu.
-  ![Ürün Ekran Görüntüsü 3](/ProjectManagement/Sprint2/Resim3.png) <br>
+
+![Ürün Ekran Görüntüsü 3](/ProjectManagement/Sprint2/Resim3.png) <br>
+
 - **Backend & Veritabanı Kurulumu**: Supabase entegrasyonu başarıyla tamamlandı. PostgreSQL veritabanı şeması ve RLS (Row Level Security) politikaları aktif edildi.
-  ![Ürün Ekran Görüntüsü 4](/ProjectManagement/Sprint2/Resim4.png)
+
+![Ürün Ekran Görüntüsü 4](/ProjectManagement/Sprint2/Resim4.png)
+
 - **İsim Kontrol Eklendi**: Sisteme ilk kez giren ve GitHub'da ismi olmayan kullanıcılar için zorunlu çıkan isim sorma ekranı yapıldı.
 
 - **Sprint Review**:
