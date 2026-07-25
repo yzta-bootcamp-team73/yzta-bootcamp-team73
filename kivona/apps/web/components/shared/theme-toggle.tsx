@@ -1,23 +1,40 @@
 "use client"
 
-import { useTheme } from "next-themes"
+import { useSyncExternalStore, useCallback } from "react"
 import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+const THEME_CHANGE_EVENT = "kivona-theme-change"
+
+function subscribe(callback: () => void) {
+  window.addEventListener(THEME_CHANGE_EVENT, callback)
+  return () => window.removeEventListener(THEME_CHANGE_EVENT, callback)
+}
+
+// document her zaman client'ta erişilebilir olduğu için useEffect+useState yerine
+// useSyncExternalStore kullanıyoruz — React bunu SSR/hydration'da otomatik
+// getServerSnapshot ile eşleştirip mismatch üretmeden sonra gerçek değere geçiriyor.
+function getSnapshot() {
+  return document.documentElement.classList.contains("dark")
+}
+
+function getServerSnapshot() {
+  return false
+}
+
 export function ThemeToggle() {
-  // Sunucuda (ve client'ta ilk render'da) resolvedTheme henüz `undefined`'dır;
-  // next-themes kendi içinde bunu mount sonrası çözüp yeniden render eder,
-  // bu yüzden burada ayrı bir "mounted" state'ine gerek yok.
-  const { resolvedTheme, setTheme } = useTheme()
+  const isDark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+
+  const toggleTheme = useCallback(() => {
+    const next = !document.documentElement.classList.contains("dark")
+    document.documentElement.classList.toggle("dark", next)
+    localStorage.setItem("kivona-theme", next ? "dark" : "light")
+    window.dispatchEvent(new Event(THEME_CHANGE_EVENT))
+  }, [])
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      aria-label="Temayı değiştir"
-    >
-      {resolvedTheme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+    <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Temayı değiştir">
+      {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
     </Button>
   )
 }
