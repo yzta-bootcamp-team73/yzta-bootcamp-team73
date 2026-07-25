@@ -1,0 +1,132 @@
+export type DemoRole = "developer" | "designer" | "data_scientist" | "pm"
+
+export interface DemoProfile {
+  id: string
+  fullName: string
+  username: string
+  role: DemoRole
+  skills: string[]
+  lookingFor: string[]
+  bio: string
+}
+
+export const roleLabels: Record<DemoRole, string> = {
+  developer: "Geliştirici",
+  designer: "Tasarımcı",
+  data_scientist: "Veri Bilimci",
+  pm: "Proje Yöneticisi",
+}
+
+/**
+ * Demo/seed profilleri — gerçek çok-kullanıcılı Supabase verisi bağlanana kadar
+ * /match sayfasını gerçekçi verilerle test edilebilir kılmak için kullanılır.
+ */
+export const demoProfiles: DemoProfile[] = [
+  {
+    id: "p1",
+    fullName: "Zeynep Yılmaz",
+    username: "zeynepy",
+    role: "developer",
+    skills: ["TypeScript", "React", "CSS"],
+    lookingFor: ["Backend Geliştirici", "Veri Bilimci"],
+    bio: "Frontend'de 3 yıllık deneyim, etkileşimli arayüzlere meraklı.",
+  },
+  {
+    id: "p2",
+    fullName: "Mert Demir",
+    username: "mertd",
+    role: "developer",
+    skills: ["Python", "Go", "Docker"],
+    lookingFor: ["Frontend Geliştirici", "Tasarımcı"],
+    bio: "Backend ve altyapı odaklı, ölçeklenebilir API'ler kurmayı seviyor.",
+  },
+  {
+    id: "p3",
+    fullName: "Elif Kaya",
+    username: "elifk",
+    role: "data_scientist",
+    skills: ["Python", "Jupyter Notebook", "R"],
+    lookingFor: ["Frontend Geliştirici"],
+    bio: "Veri analizi ve makine öğrenmesi modelleri üzerine çalışıyor.",
+  },
+  {
+    id: "p4",
+    fullName: "Can Öztürk",
+    username: "canozturk",
+    role: "designer",
+    skills: ["Figma", "CSS", "HTML"],
+    lookingFor: ["Frontend Geliştirici", "Backend Geliştirici"],
+    bio: "Ürün tasarımı ve kullanıcı deneyimi odaklı, hızlı prototipleme yapar.",
+  },
+  {
+    id: "p5",
+    fullName: "Selin Arslan",
+    username: "selina",
+    role: "developer",
+    skills: ["JavaScript", "Vue", "Node.js"],
+    lookingFor: ["Veri Bilimci", "Tasarımcı"],
+    bio: "Full-stack geliştirici, küçük ekiplerde hızlı MVP çıkarmayı sever.",
+  },
+  {
+    id: "p6",
+    fullName: "Burak Şahin",
+    username: "buraks",
+    role: "pm",
+    skills: ["Notion", "Jira"],
+    lookingFor: ["Geliştirici", "Tasarımcı", "Veri Bilimci"],
+    bio: "Ürün yönetimi ve ekip koordinasyonunda deneyimli, hackathon organizasyonlarına katılmış.",
+  },
+  {
+    id: "p7",
+    fullName: "Ayşe Yıldız",
+    username: "aysey",
+    role: "data_scientist",
+    skills: ["Python", "TensorFlow", "SQL"],
+    lookingFor: ["Backend Geliştirici"],
+    bio: "NLP ve derin öğrenme projelerinde çalışıyor, Kaggle yarışmalarına katılıyor.",
+  },
+  {
+    id: "p8",
+    fullName: "Kerem Aydın",
+    username: "keremaydin",
+    role: "developer",
+    skills: ["Java", "Kotlin", "Android"],
+    lookingFor: ["Tasarımcı", "Veri Bilimci"],
+    bio: "Mobil uygulama geliştirme konusunda uzman, Android ekosistemine hakim.",
+  },
+  {
+    id: "p9",
+    fullName: "Deniz Koç",
+    username: "denizkoc",
+    role: "designer",
+    skills: ["Figma", "Illustrator"],
+    lookingFor: ["Frontend Geliştirici"],
+    bio: "Marka ve arayüz tasarımı yapıyor, görsel hikaye anlatımına önem veriyor.",
+  },
+  {
+    id: "p10",
+    fullName: "Emre Polat",
+    username: "emrepolat",
+    role: "developer",
+    skills: ["TypeScript", "React", "Python"],
+    lookingFor: ["Veri Bilimci", "Proje Yöneticisi"],
+    bio: "Hem frontend hem backend'de rahat, önceki 2 hackathon'da dereceye girdi.",
+  },
+]
+
+/**
+ * İki beceri listesi arasındaki basit Jaccard benzerliği (kesişim / birleşim).
+ * Bu bir ML/AI modeli değildir — düz küme aritmetiğidir, roadmap'teki
+ * "Katman 2: Cosine Similarity" adımının (ML servisi) yerini tutmaz.
+ */
+export function computeCompatibility(mySkills: string[], theirSkills: string[]): number {
+  if (mySkills.length === 0 || theirSkills.length === 0) return 0
+
+  const mine = new Set(mySkills.map((s) => s.toLowerCase()))
+  const theirs = new Set(theirSkills.map((s) => s.toLowerCase()))
+
+  const intersection = [...mine].filter((skill) => theirs.has(skill)).length
+  const union = new Set([...mine, ...theirs]).size
+
+  return union === 0 ? 0 : Math.round((intersection / union) * 100)
+}

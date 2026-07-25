@@ -57,10 +57,10 @@ function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="default" render={<Link href="/login" />}>
+          <Button variant="ghost" size="default" nativeButton={false} render={<Link href="/login" />}>
             Giriş Yap
           </Button>
-          <Button variant="default" size="default" render={<Link href="/login" />}>
+          <Button variant="default" size="default" nativeButton={false} render={<Link href="/login" />}>
             <Github className="size-4" />
             Başla
           </Button>
@@ -152,6 +152,7 @@ function HeroSection() {
             variant="default"
             size="lg"
             className="h-12 px-8 text-base font-semibold"
+            nativeButton={false}
             render={<Link href="/login" />}
           >
             Hemen Başla
@@ -161,6 +162,7 @@ function HeroSection() {
             variant="outline"
             size="lg"
             className="h-12 px-8 text-base font-semibold"
+            nativeButton={false}
             render={<a href="#how-it-works" />}
           >
             Nasıl Çalışır?
@@ -348,6 +350,7 @@ function CtaSection() {
             variant="default"
             size="lg"
             className="h-12 px-8 text-base font-semibold bg-white text-primary hover:bg-white/90"
+            nativeButton={false}
             render={<Link href="/login" />}
           >
             Hemen Kayıt Ol

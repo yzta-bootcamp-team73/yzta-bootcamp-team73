@@ -35,6 +35,8 @@ const tabs = [
   { value: "web", label: "Web" },
   { value: "mobile", label: "Mobil" },
   { value: "data", label: "Data" },
+  { value: "blockchain", label: "Blockchain" },
+  { value: "iot", label: "IoT" },
 ] as const
 
 function formatDate(isoDate: string): string {

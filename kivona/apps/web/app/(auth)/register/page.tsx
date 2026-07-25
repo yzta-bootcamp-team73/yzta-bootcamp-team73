@@ -9,7 +9,6 @@ import {
   EyeOff,
   ArrowRight,
   User,
-  Sparkles,
 } from "lucide-react";
 import { Github } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";

@@ -1,9 +1,10 @@
 "use client"
 
+import type { User } from "@supabase/supabase-js"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MobileSidebar } from "@/components/shared/sidebar"
 
-export default function Navbar({ user }: { user: any }) {
+export default function Navbar({ user }: { user: User | null }) {
   const avatarUrl = user?.user_metadata?.avatar_url;
   const initials = user?.user_metadata?.full_name?.substring(0, 2).toUpperCase() || "KU";
   return (
