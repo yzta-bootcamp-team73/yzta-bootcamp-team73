@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react"
 import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core"
-import { Plus, ThumbsUp, Shuffle } from "lucide-react"
+import { Plus, ThumbsUp, Shuffle, UserPlus } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -101,22 +101,72 @@ function Column({
 
 export function TeamWorkspace({
   team,
-  members,
+  initialMembers,
   currentUserId,
   initialIdeas,
   initialIcebreakers,
 }: {
   team: Team
-  members: TeamMemberProfile[]
+  initialMembers: TeamMemberProfile[]
   currentUserId: string
   initialIdeas: Idea[]
   initialIcebreakers: IcebreakerResponse[]
 }) {
+  const [members, setMembers] = useState(initialMembers)
   const [ideas, setIdeas] = useState(initialIdeas)
   const [icebreakers, setIcebreakers] = useState(initialIcebreakers)
   const [newIdeaTitle, setNewIdeaTitle] = useState("")
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answer, setAnswer] = useState("")
+  const [inviteUsername, setInviteUsername] = useState("")
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const [inviteLoading, setInviteLoading] = useState(false)
+
+  async function handleInvite(e: FormEvent) {
+    e.preventDefault()
+    const username = inviteUsername.trim().replace(/^@/, "")
+    if (!username) return
+
+    setInviteLoading(true)
+    setInviteError(null)
+    const supabase = createClient()
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .eq("github_username", username)
+      .maybeSingle()
+
+    if (profileError || !profile) {
+      setInviteError("Bu GitHub kullanıcı adına sahip bir Kivona üyesi bulunamadı.")
+      setInviteLoading(false)
+      return
+    }
+
+    if (members.some((member) => member.id === profile.id)) {
+      setInviteError("Bu kişi zaten takımda.")
+      setInviteLoading(false)
+      return
+    }
+
+    const { error: insertError } = await supabase
+      .from("team_members")
+      .insert({ team_id: team.id, user_id: profile.id })
+
+    if (insertError) {
+      setInviteError(
+        insertError.code === "23505"
+          ? "Bu kişi zaten başka bir takımda."
+          : `Eklenemedi: ${insertError.message}`
+      )
+      setInviteLoading(false)
+      return
+    }
+
+    setMembers((prev) => [...prev, profile as TeamMemberProfile])
+    setInviteUsername("")
+    setInviteLoading(false)
+  }
 
   async function handleAddIdea(e: FormEvent) {
     e.preventDefault()
@@ -297,6 +347,31 @@ export function TeamWorkspace({
             </div>
           ))}
         </div>
+
+        {members.length < team.max_members && (
+          <form onSubmit={handleInvite} className="space-y-2 border-t border-border pt-3">
+            <label className="text-xs font-medium text-muted-foreground">
+              GitHub kullanıcı adıyla üye ekle
+            </label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="ör. octocat"
+                value={inviteUsername}
+                onChange={(e) => setInviteUsername(e.target.value)}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={!inviteUsername.trim() || inviteLoading}
+                className="shrink-0"
+              >
+                <UserPlus className="size-4" />
+                <span className="sr-only">Ekle</span>
+              </Button>
+            </div>
+            {inviteError && <p className="text-xs text-destructive">{inviteError}</p>}
+          </form>
+        )}
       </div>
     </div>
   )

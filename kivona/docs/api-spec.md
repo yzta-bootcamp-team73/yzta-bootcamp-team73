@@ -21,9 +21,10 @@ Next.js tarafında özel bir `/app/api/*` route'u yoktur — sayfalar Supabase J
 
 | İşlem | Tablo | Kullanıldığı yer |
 |---|---|---|
-| `select` | `competitions` | *(şu an statik seed veri kullanılıyor, DB'ye henüz bağlı değil — bkz. `lib/data/competitions.ts`)* |
-| `update` | `profiles` | İsim düzenleme (`components/shared/name-onboarding.tsx`, `edit-name-dialog.tsx`) |
-| `select`/`insert` | `teams`, `team_members` | Takım oluşturma/katılma (`/team` sayfası) — **RLS policy'leri `db-schema.md`'deki ek SQL uygulanmadan çalışmaz** |
+| `select` | `competitions` | Keşfet sayfası — DB'de kayıt yoksa/erişilemezse statik diziye (`lib/data/competitions.ts`) düşer |
+| `update` | `profiles` | İsim ve "aradığım roller" düzenleme (`name-onboarding.tsx`, `edit-name-dialog.tsx`, `edit-looking-for-dialog.tsx`) |
+| `select` | `profiles` | GitHub kullanıcı adıyla üye arama (`/team` davet formu) |
+| `select`/`insert` | `teams`, `team_members` | Takım oluşturma/katılma/davet etme (`/team` sayfası). `team_members.user_id` üzerinde UNIQUE kısıtı var — bir kullanıcı aynı anda yalnızca bir takımda olabilir |
 | `select`/`insert`/`update` | `ideas` | Fikir Panosu / Kanban (`/team` sayfası) |
 | `select`/`insert` | `icebreaker_responses` | Buz kırıcı kartlar (`/team` sayfası) |
 
@@ -52,5 +53,6 @@ Servisin ayakta olup olmadığını kontrol eder.
 
 ## Bilinen Eksikler
 
-- `competitions` tablosu Supabase'e taşınmadı, hâlâ statik dizi (`lib/data/competitions.ts`).
 - `/match` sayfasındaki uyum skoru basit küme benzerliğiyle (Jaccard) hesaplanıyor, ML tabanlı değil — `elif` branch'indeki ML servis endpoint'i hazır olduğunda buraya bağlanmalı.
+- `/match` sayfasındaki profiller demo/statik veridir (`lib/data/profiles.ts`), gerçek kayıtlı kullanıcılara bağlı değil — bu yüzden oradaki "Takıma Davet Et" butonu devre dışı. Gerçek davet `/team` sayfasındaki "GitHub kullanıcı adıyla üye ekle" formuyla yapılıyor.
+- Takım daveti şu an "davet gönder → kabul et" akışı değil, doğrudan ekleme (davet eden kişi zaten üye olmalı). Kabul/red akışı istenirse `team_members`'a bir `status` kolonu (`pending`/`accepted`) eklenmesi gerekir.

@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Github } from "@/components/shared/icons";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -40,7 +41,7 @@ function Navbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled
-          ? "bg-white/80 backdrop-blur-xl border-b border-border shadow-kivona-sm"
+          ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-kivona-sm"
           : "bg-transparent"
       )}
     >
@@ -57,6 +58,7 @@ function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <Button variant="ghost" size="default" nativeButton={false} render={<Link href="/login" />}>
             Giriş Yap
           </Button>

@@ -59,7 +59,7 @@ export default async function TeamPage() {
   return (
     <TeamWorkspace
       team={team}
-      members={members}
+      initialMembers={members}
       currentUserId={user.id}
       initialIdeas={(ideas as Idea[] | null) ?? []}
       initialIcebreakers={(icebreakers as IcebreakerResponse[] | null) ?? []}

@@ -3,6 +3,7 @@ import { Github } from "@/components/shared/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { createClient } from "@/lib/supabase/server"
 import { EditNameDialog } from "@/components/shared/edit-name-dialog"
+import { EditLookingForDialog } from "@/components/shared/edit-looking-for-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,11 +20,14 @@ import {
   topRepos,
 } from "@/lib/github/client"
 
-const lookingFor = ["UI/UX Tasarımcı", "Veri Bilimci"]
-
 export default async function ProfilePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  const { data: profileRow } = user
+    ? await supabase.from("profiles").select("looking_for").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const lookingFor: string[] = profileRow?.looking_for ?? [];
 
   const avatarUrl = user?.user_metadata?.avatar_url;
   const userNameStr = user?.user_metadata?.user_name || "kullanici";
@@ -103,15 +107,24 @@ export default async function ProfilePage() {
 
             {/* Looking For */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">
-                Aradığım Roller
-              </h3>
+              <div className="flex items-center">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Aradığım Roller
+                </h3>
+                {user && <EditLookingForDialog userId={user.id} currentRoles={lookingFor} />}
+              </div>
               <div className="flex flex-wrap gap-2">
-                {lookingFor.map((role) => (
-                  <Badge key={role} variant="outline">
-                    {role}
-                  </Badge>
-                ))}
+                {lookingFor.length > 0 ? (
+                  lookingFor.map((role) => (
+                    <Badge key={role} variant="outline">
+                      {role}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Henüz belirtilmedi — düzenle simgesine tıklayarak ekleyebilirsin.
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
