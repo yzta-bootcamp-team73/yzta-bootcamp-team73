@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import type { User as SupabaseUser } from "@supabase/supabase-js"
 import {
   Compass,
   Users,
@@ -30,7 +31,7 @@ const navLinks = [
   { href: "/profile", label: "Profilim", icon: User },
 ]
 
-function SidebarContent({ user }: { user: any }) {
+function SidebarContent({ user }: { user: SupabaseUser | null }) {
   const pathname = usePathname()
   
   const handleLogout = async () => {
@@ -104,15 +105,15 @@ function SidebarContent({ user }: { user: any }) {
   )
 }
 
-export default function Sidebar({ user }: { user?: any }) {
+export default function Sidebar({ user }: { user?: SupabaseUser | null }) {
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-border bg-card">
-      <SidebarContent user={user} />
+      <SidebarContent user={user ?? null} />
     </aside>
   )
 }
 
-export function MobileSidebar({ user }: { user?: any }) {
+export function MobileSidebar({ user }: { user?: SupabaseUser | null }) {
   return (
     <Sheet>
       <SheetTrigger
@@ -127,7 +128,7 @@ export function MobileSidebar({ user }: { user?: any }) {
         <SheetHeader className="sr-only">
           <SheetTitle>Navigasyon Menüsü</SheetTitle>
         </SheetHeader>
-        <SidebarContent user={user} />
+        <SidebarContent user={user ?? null} />
       </SheetContent>
     </Sheet>
   )

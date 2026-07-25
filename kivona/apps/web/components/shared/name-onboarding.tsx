@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import type { User } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
 import {
   Dialog,
@@ -14,21 +15,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sparkles, User as UserIcon } from "lucide-react"
 
-export function NameOnboarding({ user }: { user: any }) {
-  const [open, setOpen] = useState(false)
+export function NameOnboarding({ user }: { user: User | null }) {
+  // `user` sunucu bileşeninden ilk render'da hazır geldiği için effect yerine
+  // lazy initializer kullanılıyor — bu da setState-in-effect uyarısını ortadan kaldırıyor.
+  const [open, setOpen] = useState(() => !!user && !user.user_metadata?.full_name)
   const [fullName, setFullName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    // Sadece giriş yapmış ama user_metadata içinde full_name'i olmayanlara göster
-    if (user && !user.user_metadata?.full_name) {
-      setOpen(true)
-    }
-  }, [user])
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!fullName.trim()) return
+    if (!user || !fullName.trim()) return
 
     setIsLoading(true)
     const supabase = createClient()
@@ -54,9 +50,10 @@ export function NameOnboarding({ user }: { user: any }) {
       // Başarılı, formu kapat ve sayfayı yenile ki yeni isim her yere (sidebar vb) yansısın
       setOpen(false)
       window.location.reload()
-    } catch (error: any) {
+    } catch (error) {
       console.error("İsim güncellenirken hata oluştu:", error)
-      alert(`Bir hata oluştu: ${error?.message || "Bilinmeyen hata"}`)
+      const message = error instanceof Error ? error.message : "Bilinmeyen hata"
+      alert(`Bir hata oluştu: ${message}`)
       setIsLoading(false)
     }
   }
@@ -80,9 +77,9 @@ export function NameOnboarding({ user }: { user: any }) {
           <div className="mx-auto bg-primary/10 p-3 rounded-full mb-2">
             <Sparkles className="w-6 h-6 text-primary" />
           </div>
-          <DialogTitle className="text-center text-xl">Kivona'ya Hoş Geldin!</DialogTitle>
+          <DialogTitle className="text-center text-xl">Kivona&apos;ya Hoş Geldin!</DialogTitle>
           <DialogDescription className="text-center">
-            Yapay zekamız GitHub profilindeki yeteneklerini harika analiz etti ama... sen kimsin? 😅 (İsmini gizli tutmayı seviyorsun anlaşılan 🥷). Mükemmel takımı kurarken sana sadece 'hey sen' diye seslenmemeleri için bize adını söyler misin?
+            Yapay zekamız GitHub profilindeki yeteneklerini harika analiz etti ama... sen kimsin? 😅 (İsmini gizli tutmayı seviyorsun anlaşılan 🥷). Mükemmel takımı kurarken sana sadece &apos;hey sen&apos; diye seslenmemeleri için bize adını söyler misin?
           </DialogDescription>
         </DialogHeader>
         

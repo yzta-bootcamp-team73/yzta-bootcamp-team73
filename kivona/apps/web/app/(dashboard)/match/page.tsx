@@ -1,30 +1,18 @@
-import { Users } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/lib/supabase/server"
+import { fetchGithubRepos, computeLanguageStats } from "@/lib/github/client"
+import { demoProfiles } from "@/lib/data/profiles"
+import { MatchBoard } from "@/components/shared/match-board"
 
-export default function MatchPage() {
-  return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center px-4 relative overflow-hidden">
-      {/* Subtle Background */}
-      <div className="absolute inset-0 bg-subtle-pattern opacity-40 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/20 blur-[100px] rounded-full pointer-events-none" />
+export default async function MatchPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-      <div className="relative z-10 flex flex-col items-center max-w-md gap-6">
-        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center border border-border">
-          <Users className="w-10 h-10 text-muted-foreground" />
-        </div>
-        
-        <div className="flex flex-col items-center gap-3">
-          <Badge variant="outline" className="text-primary border-primary/30 bg-primary/5">
-            Yakında
-          </Badge>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Akıllı Eşleştirme
-          </h1>
-          <p className="text-muted-foreground">
-            AI destekli eşleştirme motoru yakında aktif olacak. Profilini tamamla ve en uygun takım arkadaşlarını bul.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+  const repos = user?.user_metadata?.user_name
+    ? await fetchGithubRepos(user.user_metadata.user_name)
+    : []
+  const mySkills = computeLanguageStats(repos).map((stat) => stat.language)
+
+  return <MatchBoard mySkills={mySkills} profiles={demoProfiles} />
 }

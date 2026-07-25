@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Github } from "@/components/shared/icons";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -40,7 +41,7 @@ function Navbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled
-          ? "bg-white/80 backdrop-blur-xl border-b border-border shadow-kivona-sm"
+          ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-kivona-sm"
           : "bg-transparent"
       )}
     >
@@ -57,10 +58,11 @@ function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="default" render={<Link href="/login" />}>
+          <ThemeToggle />
+          <Button variant="ghost" size="default" nativeButton={false} render={<Link href="/login" />}>
             Giriş Yap
           </Button>
-          <Button variant="default" size="default" render={<Link href="/login" />}>
+          <Button variant="default" size="default" nativeButton={false} render={<Link href="/login" />}>
             <Github className="size-4" />
             Başla
           </Button>
@@ -152,6 +154,7 @@ function HeroSection() {
             variant="default"
             size="lg"
             className="h-12 px-8 text-base font-semibold"
+            nativeButton={false}
             render={<Link href="/login" />}
           >
             Hemen Başla
@@ -161,6 +164,7 @@ function HeroSection() {
             variant="outline"
             size="lg"
             className="h-12 px-8 text-base font-semibold"
+            nativeButton={false}
             render={<a href="#how-it-works" />}
           >
             Nasıl Çalışır?
@@ -348,6 +352,7 @@ function CtaSection() {
             variant="default"
             size="lg"
             className="h-12 px-8 text-base font-semibold bg-white text-primary hover:bg-white/90"
+            nativeButton={false}
             render={<Link href="/login" />}
           >
             Hemen Kayıt Ol

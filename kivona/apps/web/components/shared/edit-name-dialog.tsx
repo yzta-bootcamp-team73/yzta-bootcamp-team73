@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import type { User } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
 import {
   Dialog,
@@ -15,7 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Pencil, User as UserIcon } from "lucide-react"
 
-export function EditNameDialog({ user }: { user: any }) {
+export function EditNameDialog({ user }: { user: User | null }) {
   const [open, setOpen] = useState(false)
   const currentFullName = user?.user_metadata?.full_name || user?.user_metadata?.user_name || ""
   const [fullName, setFullName] = useState(currentFullName)
@@ -23,7 +24,7 @@ export function EditNameDialog({ user }: { user: any }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!fullName.trim() || fullName.trim() === currentFullName) {
+    if (!user || !fullName.trim() || fullName.trim() === currentFullName) {
       setOpen(false)
       return
     }
@@ -48,9 +49,10 @@ export function EditNameDialog({ user }: { user: any }) {
 
       setOpen(false)
       window.location.reload()
-    } catch (error: any) {
+    } catch (error) {
       console.error("İsim güncellenirken hata oluştu:", error)
-      alert(`Bir hata oluştu: ${error?.message || "Bilinmeyen hata"}`)
+      const message = error instanceof Error ? error.message : "Bilinmeyen hata"
+      alert(`Bir hata oluştu: ${message}`)
       setIsLoading(false)
     }
   }

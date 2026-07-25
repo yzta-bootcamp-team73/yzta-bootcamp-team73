@@ -1,8 +1,9 @@
-import { Sparkles, FolderGit2 } from "lucide-react";
+import { Sparkles, FolderGit2, Star, GitFork, ExternalLink } from "lucide-react";
 import { Github } from "@/components/shared/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { createClient } from "@/lib/supabase/server"
 import { EditNameDialog } from "@/components/shared/edit-name-dialog"
+import { EditLookingForDialog } from "@/components/shared/edit-looking-for-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,19 +14,32 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-
-const skills = ["React", "Next.js", "Python", "TypeScript", "TailwindCSS", "Node.js"]
-const lookingFor = ["UI/UX Tasarımcı", "Veri Bilimci"]
+import {
+  fetchGithubRepos,
+  computeLanguageStats,
+  topRepos,
+} from "@/lib/github/client"
 
 export default async function ProfilePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  const { data: profileRow } = user
+    ? await supabase.from("profiles").select("looking_for").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const lookingFor: string[] = profileRow?.looking_for ?? [];
 
   const avatarUrl = user?.user_metadata?.avatar_url;
   const userNameStr = user?.user_metadata?.user_name || "kullanici";
   const fullName = user?.user_metadata?.full_name || userNameStr;
   const userName = `@${userNameStr}`;
   const initials = fullName.substring(0, 2).toUpperCase();
+
+  const repos = user?.user_metadata?.user_name
+    ? await fetchGithubRepos(user.user_metadata.user_name)
+    : [];
+  const languageStats = computeLanguageStats(repos).slice(0, 6);
+  const featuredRepos = topRepos(repos, 4);
 
   return (
     <div className="space-y-6">
@@ -66,17 +80,26 @@ export default async function ProfilePage() {
 
             <Separator />
 
-            {/* Skills */}
+            {/* Skills — GitHub repolarındaki dil dağılımına göre (basit sayım, AI değil) */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">
                 Yetenekler
+                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                  GitHub repolarına göre
+                </span>
               </h3>
               <div className="flex flex-wrap gap-2">
-                {skills.map((skill) => (
-                  <Badge key={skill} variant="secondary">
-                    {skill}
-                  </Badge>
-                ))}
+                {languageStats.length > 0 ? (
+                  languageStats.map((stat) => (
+                    <Badge key={stat.language} variant="secondary">
+                      {stat.language} · %{stat.percentage}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Genel dil dağılımı için GitHub repolarında yeterli veri bulunamadı.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -84,15 +107,24 @@ export default async function ProfilePage() {
 
             {/* Looking For */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">
-                Aradığım Roller
-              </h3>
+              <div className="flex items-center">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Aradığım Roller
+                </h3>
+                {user && <EditLookingForDialog userId={user.id} currentRoles={lookingFor} />}
+              </div>
               <div className="flex flex-wrap gap-2">
-                {lookingFor.map((role) => (
-                  <Badge key={role} variant="outline">
-                    {role}
-                  </Badge>
-                ))}
+                {lookingFor.length > 0 ? (
+                  lookingFor.map((role) => (
+                    <Badge key={role} variant="outline">
+                      {role}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Henüz belirtilmedi — düzenle simgesine tıklayarak ekleyebilirsin.
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -130,16 +162,60 @@ export default async function ProfilePage() {
                 GitHub Repoları
               </CardTitle>
               <CardDescription>
-                GitHub hesabınız bağlandığında repolarınız burada görünecek.
+                {featuredRepos.length > 0
+                  ? "Yıldız sayısına göre öne çıkan repolarınız."
+                  : "GitHub hesabınız bağlandığında repolarınız burada görünecek."}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-8 text-center">
-                <Github className="size-8 text-muted-foreground/50" />
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Henüz bağlı repo yok
-                </p>
-              </div>
+              {featuredRepos.length > 0 ? (
+                <div className="space-y-3">
+                  {featuredRepos.map((repo) => (
+                    <a
+                      key={repo.id}
+                      href={repo.html_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group block rounded-lg border border-border p-3 transition-colors hover:bg-muted"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-sm font-medium text-foreground">
+                          {repo.name}
+                        </span>
+                        <ExternalLink className="size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                      </div>
+                      {repo.description && (
+                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                          {repo.description}
+                        </p>
+                      )}
+                      <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                        {repo.language && (
+                          <span className="flex items-center gap-1">
+                            <span className="size-2 rounded-full bg-primary/60" />
+                            {repo.language}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Star className="size-3" />
+                          {repo.stargazers_count}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <GitFork className="size-3" />
+                          {repo.forks_count}
+                        </span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-8 text-center">
+                  <Github className="size-8 text-muted-foreground/50" />
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Henüz bağlı repo yok
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
