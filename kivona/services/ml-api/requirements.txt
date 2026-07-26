@@ -1,8 +1,10 @@
-fastapi
-uvicorn[standard]
-sentence-transformers
-scikit-learn
-numpy
-scipy
-# CPU-only PyTorch; adjust if using CUDA in deployment
-torch
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+sentence-transformers==3.0.0
+scikit-learn==1.5.0
+requests==2.32.0
+beautifulsoup4==4.12.0
+python-dotenv==1.0.0
+numpy==2.5.1
+scipy==1.18.0
+torch==2.13.0
