@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server"
 import { EditNameDialog } from "@/components/shared/edit-name-dialog"
 import { EditLookingForDialog } from "@/components/shared/edit-looking-for-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -14,11 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import {
-  fetchGithubRepos,
-  computeLanguageStats,
-  topRepos,
-} from "@/lib/github/client"
+import { GitHubAnalysisTrigger } from "@/components/shared/github-analysis-trigger"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -35,11 +31,29 @@ export default async function ProfilePage() {
   const userName = `@${userNameStr}`;
   const initials = fullName.substring(0, 2).toUpperCase();
 
-  const repos = user?.user_metadata?.user_name
-    ? await fetchGithubRepos(user.user_metadata.user_name)
-    : [];
-  const languageStats = computeLanguageStats(repos).slice(0, 6);
-  const featuredRepos = topRepos(repos, 4);
+  // Profil tablosundan verileri çek
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user?.id)
+    .single();
+
+  // GitHub analiz verileri 
+  const analysis = profile?.ai_analysis || null;
+  const hasGitHub = !!user?.user_metadata?.user_name;
+
+  // Analiz varsa dinamik veri, yoksa boş
+  const skills = analysis?.skills ?? [];
+  const specializations = analysis?.specializations ?? [];
+  const primaryRole = analysis?.primary_role || "Geliştirici";
+  const summary = analysis?.professional_summary || "Yeni üye | Beceriler yakında AI tarafından analiz edilecek.";
+  const repositories = analysis?.repositories ?? [];
+
+  const getConfidenceColor = (score: number) => {
+    if (score >= 90) return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30";
+    if (score >= 70) return "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30";
+    return "bg-slate-500/15 text-slate-700 dark:text-slate-400 border-slate-500/30";
+  };
 
   return (
     <div className="space-y-6">
@@ -70,17 +84,17 @@ export default async function ProfilePage() {
                 </div>
                 <p className="text-sm text-muted-foreground">{userName}</p>
                 <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                  Yeni üye | Beceriler yakında AI tarafından analiz edilecek.
+                  {summary}
                 </p>
                 <div className="mt-3">
-                  <Badge>Geliştirici</Badge>
+                  <Badge>{primaryRole}</Badge>
                 </div>
               </div>
             </div>
 
             <Separator />
 
-            {/* Skills — GitHub repolarındaki dil dağılımına göre (basit sayım, AI değil) */}
+            {/* Skills — GitHub repolarındaki dil dağılımına göre */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">
                 Yetenekler
@@ -88,24 +102,77 @@ export default async function ProfilePage() {
                   GitHub repolarına göre
                 </span>
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {languageStats.length > 0 ? (
-                  languageStats.map((stat) => (
-                    <Badge key={stat.language} variant="secondary">
-                      {stat.language} · %{stat.percentage}
-                    </Badge>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Genel dil dağılımı için GitHub repolarında yeterli veri bulunamadı.
-                  </p>
-                )}
-              </div>
+              {skills.length > 0 ? (
+                <TooltipProvider delay={200}>
+                  <div className="flex flex-wrap gap-2">
+                    {skills.map((skill: any) => (
+                      <Tooltip key={skill.name}>
+                        <TooltipTrigger className="cursor-help">
+                          <Badge 
+                            variant="outline" 
+                            className={`flex items-center gap-1.5 px-2.5 py-1 transition-colors hover:brightness-95 dark:hover:brightness-110 ${getConfidenceColor(skill.confidence || 0)}`}
+                          >
+                            {skill.name}
+                            {skill.confidence && (
+                              <span className="text-[10px] font-bold opacity-70">
+                                %{skill.confidence}
+                              </span>
+                            )}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent sideOffset={8} className="max-w-xs p-3">
+                          <div className="font-semibold text-sm border-b pb-1.5 mb-2 flex items-center gap-2">
+                            <Sparkles className="size-3.5 text-primary" />
+                            AI Karar Detayı
+                          </div>
+                          {skill.reasons?.length > 0 ? (
+                            <ul className="space-y-1.5">
+                              {skill.reasons.map((reason: string, idx: number) => (
+                                <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5 leading-snug">
+                                  <span className="mt-1 size-1 shrink-0 rounded-full bg-primary/60" />
+                                  <span>{reason}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">Genel analiz sonucu eklendi.</p>
+                          )}
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                </TooltipProvider>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  GitHub profilinizi analiz ettirerek yeteneklerinizi otomatik olarak belirleyebilirsiniz.
+                </p>
+              )}
             </div>
 
             <Separator />
 
-            {/* Looking For */}
+            {/* Specializations & Looking For */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">
+                Uzmanlık Alanları
+              </h3>
+              {specializations.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {specializations.map((spec: string) => (
+                    <Badge key={spec} variant="outline">
+                      {spec}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Analiz sonrasında uzmanlık alanlarınız burada görünecek.
+                </p>
+              )}
+            </div>
+
+            <Separator />
+
             <div className="space-y-3">
               <div className="flex items-center">
                 <h3 className="text-sm font-semibold text-foreground">
@@ -132,27 +199,11 @@ export default async function ProfilePage() {
 
         {/* Side Cards */}
         <div className="space-y-6">
-          {/* AI Analysis Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="size-5 text-primary" />
-                AI Yetkinlik Analizi
-              </CardTitle>
-              <CardDescription>
-                Profilinizi analiz etmek için GitHub hesabınızı bağlayın.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button disabled className="w-full gap-2">
-                <Github className="size-4" />
-                GitHub ile Analiz Et
-              </Button>
-              <div className="mt-3 flex justify-center">
-                <Badge variant="outline">Yakında</Badge>
-              </div>
-            </CardContent>
-          </Card>
+          {/* AI Analysis Card — Now interactive */}
+          <GitHubAnalysisTrigger
+            hasGitHub={hasGitHub}
+            existingAnalysis={analysis}
+          />
 
           {/* GitHub Repos Card */}
           <Card>
@@ -162,50 +213,62 @@ export default async function ProfilePage() {
                 GitHub Repoları
               </CardTitle>
               <CardDescription>
-                {featuredRepos.length > 0
-                  ? "Yıldız sayısına göre öne çıkan repolarınız."
+                {repositories.length > 0
+                  ? `${repositories.length} public repository (Yıldızlara göre)`
                   : "GitHub hesabınız bağlandığında repolarınız burada görünecek."}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {featuredRepos.length > 0 ? (
-                <div className="space-y-3">
-                  {featuredRepos.map((repo) => (
-                    <a
-                      key={repo.id}
-                      href={repo.html_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group block rounded-lg border border-border p-3 transition-colors hover:bg-muted"
+              {repositories.length > 0 ? (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                  {repositories.map((repo: any) => (
+                    <div
+                      key={repo.name}
+                      className="rounded-lg border border-border p-3 space-y-2 transition-colors hover:bg-muted/50"
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-sm font-medium text-foreground">
+                      <div className="flex items-start justify-between gap-2">
+                        <a
+                          href={repo.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+                        >
                           {repo.name}
-                        </span>
-                        <ExternalLink className="size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                          <ExternalLink className="size-3" />
+                        </a>
+                        <div className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
+                          {repo.stars > 0 && (
+                            <span className="flex items-center gap-0.5">
+                              <Star className="size-3" />
+                              {repo.stars}
+                            </span>
+                          )}
+                          {repo.forks > 0 && (
+                            <span className="flex items-center gap-0.5">
+                              <GitFork className="size-3" />
+                              {repo.forks}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {repo.description && (
-                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground line-clamp-2">
                           {repo.description}
                         </p>
                       )}
-                      <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
                         {repo.language && (
-                          <span className="flex items-center gap-1">
-                            <span className="size-2 rounded-full bg-primary/60" />
+                          <Badge variant="secondary" className="text-xs py-0 px-1.5">
                             {repo.language}
-                          </span>
+                          </Badge>
                         )}
-                        <span className="flex items-center gap-1">
-                          <Star className="size-3" />
-                          {repo.stargazers_count}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <GitFork className="size-3" />
-                          {repo.forks_count}
-                        </span>
+                        {repo.topics?.slice(0, 3).map((topic: string) => (
+                          <Badge key={topic} variant="outline" className="text-xs py-0 px-1.5">
+                            {topic}
+                          </Badge>
+                        ))}
                       </div>
-                    </a>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -223,3 +286,4 @@ export default async function ProfilePage() {
     </div>
   )
 }
+
