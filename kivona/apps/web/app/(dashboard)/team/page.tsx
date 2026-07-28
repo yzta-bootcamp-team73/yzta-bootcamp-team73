@@ -1,7 +1,14 @@
 import { createClient } from "@/lib/supabase/server"
 import { CreateOrJoinTeam } from "@/components/shared/create-or-join-team"
 import { TeamWorkspace } from "@/components/shared/team-workspace"
-import type { Idea, IcebreakerResponse, TeamMemberProfile, TeamMessage } from "@/types/team"
+import { PendingInvite } from "@/components/shared/pending-invite"
+import type {
+  Idea,
+  IcebreakerResponse,
+  TeamMemberProfile,
+  TeamMessage,
+  MembershipStatus,
+} from "@/types/team"
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -13,7 +20,7 @@ export default async function TeamPage() {
 
   const { data: membership } = await supabase
     .from("team_members")
-    .select("team_id")
+    .select("team_id, status")
     .eq("user_id", user.id)
     .maybeSingle()
 
@@ -37,11 +44,15 @@ export default async function TeamPage() {
     return <CreateOrJoinTeam userId={user.id} openTeams={[]} />
   }
 
+  if (membership.status === "pending") {
+    return <PendingInvite team={team} currentUserId={user.id} />
+  }
+
   const [{ data: memberRows }, { data: ideas }, { data: icebreakers }, { data: messages }] =
     await Promise.all([
       supabase
         .from("team_members")
-        .select("user_id, profiles(id, full_name, avatar_url)")
+        .select("user_id, status, profiles(id, full_name, avatar_url)")
         .eq("team_id", membership.team_id),
       supabase
         .from("ideas")
@@ -60,7 +71,13 @@ export default async function TeamPage() {
     ])
 
   const members: TeamMemberProfile[] = (memberRows ?? [])
-    .map((row) => (row as unknown as { profiles: TeamMemberProfile | null }).profiles)
+    .map((row): TeamMemberProfile | null => {
+      const { profiles, status } = row as unknown as {
+        profiles: TeamMemberProfile | null
+        status: MembershipStatus
+      }
+      return profiles ? { ...profiles, status } : null
+    })
     .filter((profile): profile is TeamMemberProfile => Boolean(profile))
 
   return (

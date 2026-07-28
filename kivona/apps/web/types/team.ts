@@ -1,7 +1,10 @@
+export type MembershipStatus = "pending" | "accepted"
+
 export interface TeamMemberProfile {
   id: string
   full_name: string | null
   avatar_url: string | null
+  status?: MembershipStatus
 }
 
 export interface Team {

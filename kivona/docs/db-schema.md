@@ -137,4 +137,23 @@ CREATE POLICY "Team members can view team files" ON storage.objects FOR SELECT U
 >
 > Görüntülü görüşme (WebRTC) bu turda **eklenmedi** — kendi altyapınızla haftalar süren bir iş; ileride gerekirse Daily.co/LiveKit gibi hazır bir SDK ile günler seviyesinde eklenebilir.
 
-> Bu SQL'ler Supabase projesine **manuel olarak** SQL Editor'dan uygulanmalıdır — repo içinde otomatik migration çalıştıran bir araç (örn. Supabase CLI migrations) henüz kurulu değil.
+## Uygulanması gereken ek SQL (4. tur — takıma davet "kabul et/reddet" akışı)
+
+Önceden "GitHub kullanıcı adıyla üye ekle" formu kişiyi **doğrudan** takıma ekliyordu. Artık bir davet oluşturuyor; karşı taraf `/team` sayfasını açtığında kabul/red seçeneğiyle karşılaşıyor, kabul edene kadar takımın içeriğini (Kanban, mesajlar, buz kırıcı) göremiyor.
+
+```sql
+-- team_members'a durum kolonu — mevcut satırlar (zaten kurulmuş/katılmış üyeler) varsayılan olarak 'accepted' sayılır
+ALTER TABLE public.team_members ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'accepted';
+-- status: 'pending' (davet gönderildi, cevap bekleniyor) | 'accepted'
+
+-- Kullanıcı kendi adına gelen daveti kabul edebilsin (status'u 'accepted' yapabilsin)
+CREATE POLICY "Users can respond to their own invite" ON public.team_members FOR UPDATE USING (
+  auth.uid() = user_id
+) WITH CHECK (
+  auth.uid() = user_id
+);
+
+GRANT UPDATE ON public.team_members TO authenticated;
+```
+
+> **Bilinen sınır:** `ideas`, `icebreaker_responses`, `messages` tablolarının RLS policy'leri "bu kullanıcı `team_members`'ta bu takımın satırına sahip mi" diye bakıyor, `status = 'accepted'` şartını kontrol etmiyor. Yani arayüz pending bir davetliyi Kabul/Red ekranına hapsediyor ama teorik olarak biri doğrudan API çağrısıyla henüz kabul etmediği takımın içeriğini okuyabilir. Bootcamp MVP'si için düşük risk (kimse öyle bir şey denemez) ama tam sıkılaştırmak istersen bu üç tablonun policy'lerine `AND team_members.status = 'accepted'` eklenmesi gerekir — istersen ayrıca yaparım.

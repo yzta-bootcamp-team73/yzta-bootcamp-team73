@@ -136,6 +136,7 @@ export function TeamWorkspace({
   const [answer, setAnswer] = useState("")
   const [inviteUsername, setInviteUsername] = useState("")
   const [inviteError, setInviteError] = useState<string | null>(null)
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null)
   const [inviteLoading, setInviteLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("kanban")
   const [messages, setMessages] = useState(initialMessages)
@@ -227,6 +228,7 @@ export function TeamWorkspace({
 
     setInviteLoading(true)
     setInviteError(null)
+    setInviteSuccess(null)
     const supabase = createClient()
 
     const { data: profile, error: profileError } = await supabase
@@ -242,27 +244,28 @@ export function TeamWorkspace({
     }
 
     if (members.some((member) => member.id === profile.id)) {
-      setInviteError("Bu kişi zaten takımda.")
+      setInviteError("Bu kişiye zaten davet gönderilmiş ya da takımda.")
       setInviteLoading(false)
       return
     }
 
     const { error: insertError } = await supabase
       .from("team_members")
-      .insert({ team_id: team.id, user_id: profile.id })
+      .insert({ team_id: team.id, user_id: profile.id, status: "pending" })
 
     if (insertError) {
       setInviteError(
         insertError.code === "23505"
-          ? "Bu kişi zaten başka bir takımda."
+          ? "Bu kişi zaten bir takımda ya da bekleyen bir daveti var."
           : `Eklenemedi: ${insertError.message}`
       )
       setInviteLoading(false)
       return
     }
 
-    setMembers((prev) => [...prev, profile as TeamMemberProfile])
+    setMembers((prev) => [...prev, { ...(profile as TeamMemberProfile), status: "pending" }])
     setInviteUsername("")
+    setInviteSuccess("Davet gönderildi, kabul etmesini bekliyoruz.")
     setInviteLoading(false)
   }
 
@@ -456,9 +459,14 @@ export function TeamWorkspace({
                   {(member.full_name ?? "?").slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="truncate text-sm text-foreground">
+              <span className="flex-1 truncate text-sm text-foreground">
                 {member.full_name ?? "İsimsiz"}
               </span>
+              {member.status === "pending" && (
+                <Badge variant="outline" className="text-xs">
+                  Bekliyor
+                </Badge>
+              )}
             </div>
           ))}
         </div>
@@ -466,7 +474,7 @@ export function TeamWorkspace({
         {members.length < team.max_members && (
           <form onSubmit={handleInvite} className="space-y-2 border-t border-border pt-3">
             <label className="text-xs font-medium text-muted-foreground">
-              GitHub kullanıcı adıyla üye ekle
+              GitHub kullanıcı adıyla davet et
             </label>
             <div className="flex gap-2">
               <Input
@@ -481,10 +489,11 @@ export function TeamWorkspace({
                 className="shrink-0"
               >
                 <UserPlus className="size-4" />
-                <span className="sr-only">Ekle</span>
+                <span className="sr-only">Davet Et</span>
               </Button>
             </div>
             {inviteError && <p className="text-xs text-destructive">{inviteError}</p>}
+            {inviteSuccess && <p className="text-xs text-emerald-600 dark:text-emerald-400">{inviteSuccess}</p>}
           </form>
         )}
 
