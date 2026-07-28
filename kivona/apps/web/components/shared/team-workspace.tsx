@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core"
-import { Plus, ThumbsUp, Shuffle, UserPlus } from "lucide-react"
+import { Plus, ThumbsUp, Shuffle, UserPlus, LogOut } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +11,16 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog"
 import { icebreakerQuestions } from "@/lib/data/icebreaker-questions"
 import { TeamChat } from "@/components/shared/team-chat"
 import type {
@@ -116,6 +127,7 @@ export function TeamWorkspace({
   initialIcebreakers: IcebreakerResponse[]
   initialMessages: TeamMessage[]
 }) {
+  const router = useRouter()
   const [members, setMembers] = useState(initialMembers)
   const [ideas, setIdeas] = useState(initialIdeas)
   const [icebreakers, setIcebreakers] = useState(initialIcebreakers)
@@ -125,6 +137,88 @@ export function TeamWorkspace({
   const [inviteUsername, setInviteUsername] = useState("")
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [inviteLoading, setInviteLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState("kanban")
+  const [messages, setMessages] = useState(initialMessages)
+  const [isUploading, setIsUploading] = useState(false)
+  const [lastReadMessagesAt, setLastReadMessagesAt] = useState<Date | null>(null)
+  const [isLeaving, setIsLeaving] = useState(false)
+
+  const lastMessage = messages[messages.length - 1]
+  const hasUnreadMessages =
+    activeTab !== "messages" &&
+    Boolean(lastMessage) &&
+    (!lastReadMessagesAt || new Date(lastMessage.created_at) > lastReadMessagesAt)
+
+  function handleTabChange(value: string) {
+    setActiveTab(value)
+    if (value === "messages") {
+      setLastReadMessagesAt(new Date())
+    }
+  }
+
+  // Takım kanalını dinleyip başkalarının gönderdiği mesajları anlık ekliyoruz.
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`messages:${team.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `team_id=eq.${team.id}` },
+        (payload) => {
+          setMessages((prev) =>
+            prev.some((m) => m.id === (payload.new as TeamMessage).id)
+              ? prev
+              : [...prev, payload.new as TeamMessage]
+          )
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [team.id])
+
+  function handleSendMessage(content: string) {
+    const supabase = createClient()
+    supabase
+      .from("messages")
+      .insert({ team_id: team.id, user_id: currentUserId, content })
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data as TeamMessage]))
+        }
+      })
+  }
+
+  async function handleUploadFile(file: File) {
+    setIsUploading(true)
+    const supabase = createClient()
+    const path = `${team.id}/${Date.now()}-${file.name}`
+
+    const { error: uploadError } = await supabase.storage.from("team-files").upload(path, file)
+    if (!uploadError) {
+      const { data, error } = await supabase
+        .from("messages")
+        .insert({ team_id: team.id, user_id: currentUserId, file_path: path, file_name: file.name })
+        .select()
+        .single()
+
+      if (!error && data) {
+        setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data as TeamMessage]))
+      }
+    }
+    setIsUploading(false)
+  }
+
+  async function handleLeaveTeam() {
+    setIsLeaving(true)
+    const supabase = createClient()
+    await supabase.from("team_members").delete().eq("team_id", team.id).eq("user_id", currentUserId)
+    router.refresh()
+  }
 
   async function handleInvite(e: FormEvent) {
     e.preventDefault()
@@ -246,11 +340,16 @@ export function TeamWorkspace({
           )}
         </div>
 
-        <Tabs defaultValue="kanban">
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="kanban">Fikir Panosu</TabsTrigger>
             <TabsTrigger value="icebreaker">Buz Kırıcı</TabsTrigger>
-            <TabsTrigger value="messages">Mesajlar</TabsTrigger>
+            <TabsTrigger value="messages" className="relative">
+              Mesajlar
+              {hasUnreadMessages && (
+                <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-destructive" />
+              )}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="kanban" className="mt-6 space-y-4">
@@ -330,10 +429,12 @@ export function TeamWorkspace({
 
           <TabsContent value="messages" className="mt-6">
             <TeamChat
-              teamId={team.id}
               currentUserId={currentUserId}
               members={members}
-              initialMessages={initialMessages}
+              messages={messages}
+              onSend={handleSendMessage}
+              onUploadFile={handleUploadFile}
+              isUploading={isUploading}
             />
           </TabsContent>
         </Tabs>
@@ -386,6 +487,38 @@ export function TeamWorkspace({
             {inviteError && <p className="text-xs text-destructive">{inviteError}</p>}
           </form>
         )}
+
+        <Dialog>
+          <DialogTrigger
+            render={
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full gap-1.5 text-destructive hover:text-destructive"
+              />
+            }
+          >
+            <LogOut className="size-3.5" />
+            Takımdan Ayrıl
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Takımdan ayrılmak istediğine emin misin?</DialogTitle>
+              <DialogDescription>
+                &quot;{team.name}&quot; takımından ayrılırsın, tekrar katılmak için davet edilmen ya
+                da yeniden katılman gerekir.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="sm:justify-end gap-2">
+              <DialogClose render={<Button variant="outline" disabled={isLeaving} />}>
+                Vazgeç
+              </DialogClose>
+              <Button variant="destructive" onClick={handleLeaveTeam} disabled={isLeaving}>
+                {isLeaving ? "Ayrılınıyor..." : "Evet, Ayrıl"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

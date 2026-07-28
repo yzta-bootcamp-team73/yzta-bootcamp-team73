@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Brain,
   Users,
@@ -23,6 +24,15 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.08, ease: "easeOut" as const },
+  }),
+};
 
 /* ─────────────────────────────────────────────
    Navbar
@@ -131,25 +141,49 @@ function HeroSection() {
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 py-24 text-center lg:px-8">
         {/* Eyebrow */}
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-white/70 px-4 py-1.5 text-sm font-medium text-muted-foreground backdrop-blur-sm">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          custom={0}
+          variants={fadeUp}
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-4 py-1.5 text-sm font-medium text-muted-foreground backdrop-blur-sm"
+        >
           <Sparkles className="size-3.5 text-primary" />
           AI Destekli Takım Eşleştirme Platformu
-        </div>
+        </motion.div>
 
         {/* Headline */}
-        <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+        <motion.h1
+          initial="hidden"
+          animate="visible"
+          custom={1}
+          variants={fadeUp}
+          className="text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl"
+        >
           Yeteneklerini keşfet,
           <br />
           <span className="text-primary">hayalindeki takımı kur.</span>
-        </h1>
+        </motion.h1>
 
         {/* Subtitle */}
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+        <motion.p
+          initial="hidden"
+          animate="visible"
+          custom={2}
+          variants={fadeUp}
+          className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
+        >
           Kivona, AI destekli eşleşme motoru ile GitHub profilini analiz eder, yeteneklerine en uygun takım arkadaşlarını bulur.
-        </p>
+        </motion.p>
 
         {/* CTA Buttons */}
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          custom={3}
+          variants={fadeUp}
+          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+        >
           <Button
             variant="default"
             size="lg"
@@ -170,10 +204,12 @@ function HeroSection() {
             Nasıl Çalışır?
             <ChevronDown className="ml-1 size-4" />
           </Button>
-        </div>
+        </motion.div>
 
         {/* Sample Match Card */}
-        <SampleMatchCard />
+        <motion.div initial="hidden" animate="visible" custom={4} variants={fadeUp}>
+          <SampleMatchCard />
+        </motion.div>
       </div>
     </section>
   );
@@ -228,27 +264,32 @@ function FeaturesSection() {
 
         {/* Feature cards grid */}
         <div className="mt-16 grid gap-6 sm:grid-cols-2">
-          {FEATURES.map((feature) => {
+          {FEATURES.map((feature, i) => {
             const Icon = feature.icon;
             return (
-              <Card
+              <motion.div
                 key={feature.title}
-                className="group border-border/60 transition-all duration-300 hover:shadow-kivona-lg hover:-translate-y-1"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
               >
-                <CardHeader>
-                  <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-accent">
-                    <Icon className="size-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg font-semibold text-foreground">
-                    {feature.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {feature.description}
-                  </p>
-                </CardContent>
-              </Card>
+                <Card className="group h-full border-border/60 transition-all duration-300 hover:shadow-kivona-lg hover:-translate-y-1">
+                  <CardHeader>
+                    <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-accent">
+                      <Icon className="size-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-lg font-semibold text-foreground">
+                      {feature.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
             );
           })}
         </div>
@@ -305,8 +346,15 @@ function HowItWorksSection() {
           {/* Connecting dashed line (desktop only) */}
           <div className="pointer-events-none absolute top-16 right-[16.67%] left-[16.67%] hidden h-px border-t-2 border-dashed border-border md:block" />
 
-          {STEPS.map((step) => (
-            <div key={step.step} className="relative flex flex-col items-center text-center">
+          {STEPS.map((step, i) => (
+            <motion.div
+              key={step.step}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.5, delay: i * 0.12, ease: "easeOut" }}
+              className="relative flex flex-col items-center text-center"
+            >
               {/* Step number */}
               <div className="relative z-10 flex size-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white shadow-lg shadow-primary/25">
                 {step.step}
@@ -318,7 +366,7 @@ function HowItWorksSection() {
               <p className="mt-2 max-w-xs text-muted-foreground leading-relaxed">
                 {step.description}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -337,7 +385,13 @@ function CtaSection() {
         <div className="absolute -top-40 left-1/2 size-[600px] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-3xl px-6 text-center lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative z-10 mx-auto max-w-3xl px-6 text-center lg:px-8"
+      >
         <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
           Bu maceraya bugün
           <br />
@@ -359,7 +413,7 @@ function CtaSection() {
             <ArrowRight className="ml-1 size-4" />
           </Button>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -369,7 +423,7 @@ function CtaSection() {
    ───────────────────────────────────────────── */
 function Footer() {
   return (
-    <footer className="border-t border-border bg-white py-10">
+    <footer className="border-t border-border bg-background py-10">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 text-sm text-muted-foreground md:flex-row md:justify-between lg:px-8">
         <p>© 2026 Kivona. Tüm hakları saklıdır.</p>
         <nav className="flex gap-6">

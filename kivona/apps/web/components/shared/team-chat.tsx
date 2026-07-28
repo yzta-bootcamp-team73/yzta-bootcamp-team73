@@ -15,47 +15,26 @@ function formatTime(iso: string) {
 }
 
 export function TeamChat({
-  teamId,
   currentUserId,
   members,
-  initialMessages,
+  messages,
+  onSend,
+  onUploadFile,
+  isUploading,
 }: {
-  teamId: string
   currentUserId: string
   members: TeamMemberProfile[]
-  initialMessages: TeamMessage[]
+  messages: TeamMessage[]
+  onSend: (content: string) => void
+  onUploadFile: (file: File) => void
+  isUploading: boolean
 }) {
-  const [messages, setMessages] = useState(initialMessages)
   const [text, setText] = useState("")
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({})
-  const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const memberMap = new Map(members.map((member) => [member.id, member]))
-
-  // Takım kanalını dinleyip başkalarının gönderdiği mesajları anlık ekliyoruz.
-  useEffect(() => {
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`messages:${teamId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `team_id=eq.${teamId}` },
-        (payload) => {
-          setMessages((prev) =>
-            prev.some((m) => m.id === (payload.new as TeamMessage).id)
-              ? prev
-              : [...prev, payload.new as TeamMessage]
-          )
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [teamId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -79,46 +58,18 @@ export function TeamChat({
     })
   }, [messages, fileUrls])
 
-  async function handleSend(e: FormEvent) {
+  function handleSend(e: FormEvent) {
     e.preventDefault()
     if (!text.trim()) return
-    const content = text.trim()
+    onSend(text.trim())
     setText("")
-
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({ team_id: teamId, user_id: currentUserId, content })
-      .select()
-      .single()
-
-    if (!error && data) {
-      setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data as TeamMessage]))
-    }
   }
 
-  async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setIsUploading(true)
-    const supabase = createClient()
-    const path = `${teamId}/${Date.now()}-${file.name}`
-
-    const { error: uploadError } = await supabase.storage.from(FILE_BUCKET).upload(path, file)
-    if (!uploadError) {
-      const { data, error } = await supabase
-        .from("messages")
-        .insert({ team_id: teamId, user_id: currentUserId, file_path: path, file_name: file.name })
-        .select()
-        .single()
-
-      if (!error && data) {
-        setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data as TeamMessage]))
-      }
-    }
-
-    setIsUploading(false)
-    if (fileInputRef.current) fileInputRef.current.value = ""
+    onUploadFile(file)
+    e.target.value = ""
   }
 
   return (
