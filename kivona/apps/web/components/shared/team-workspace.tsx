@@ -70,6 +70,7 @@ function IdeaCardDraggable({
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium text-foreground">{idea.title}</p>
         <button
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation()
             onDelete(idea.id)
@@ -84,6 +85,7 @@ function IdeaCardDraggable({
         <p className="line-clamp-2 text-xs text-muted-foreground">{idea.content}</p>
       )}
       <button
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation()
           onVote(idea.id)
@@ -421,7 +423,7 @@ export function TeamWorkspace({
               </Button>
             </form>
 
-            <DndContext onDragEnd={handleDragEnd}>
+            <DndContext id="team-kanban" onDragEnd={handleDragEnd}>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {columns.map((col) => (
                   <Column
