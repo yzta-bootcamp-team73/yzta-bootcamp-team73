@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core"
-import { Plus, ThumbsUp, Shuffle, UserPlus, LogOut } from "lucide-react"
+import { Plus, ThumbsUp, Shuffle, UserPlus, LogOut, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -40,10 +40,14 @@ const columns: { status: IdeaStatus; label: string }[] = [
 
 function IdeaCardDraggable({
   idea,
+  currentUserId,
   onVote,
+  onDelete,
 }: {
   idea: Idea
+  currentUserId: string
   onVote: (id: string) => void
+  onDelete: (id: string) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: idea.id,
@@ -51,6 +55,7 @@ function IdeaCardDraggable({
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined
+  const hasVoted = idea.voted_by.includes(currentUserId)
 
   return (
     <div
@@ -58,11 +63,23 @@ function IdeaCardDraggable({
       style={style}
       {...listeners}
       {...attributes}
-      className={`cursor-grab space-y-2 rounded-lg border border-border bg-card p-3 shadow-sm active:cursor-grabbing ${
+      className={`group cursor-grab space-y-2 rounded-lg border border-border bg-card p-3 shadow-sm active:cursor-grabbing ${
         isDragging ? "z-10 opacity-50" : ""
       }`}
     >
-      <p className="text-sm font-medium text-foreground">{idea.title}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-medium text-foreground">{idea.title}</p>
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete(idea.id)
+          }}
+          className="shrink-0 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+        >
+          <X className="size-3.5" />
+          <span className="sr-only">Fikri sil</span>
+        </button>
+      </div>
       {idea.content && (
         <p className="line-clamp-2 text-xs text-muted-foreground">{idea.content}</p>
       )}
@@ -71,9 +88,11 @@ function IdeaCardDraggable({
           e.stopPropagation()
           onVote(idea.id)
         }}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+        className={`flex items-center gap-1 text-xs transition-colors ${
+          hasVoted ? "font-medium text-primary" : "text-muted-foreground hover:text-primary"
+        }`}
       >
-        <ThumbsUp className="size-3" />
+        <ThumbsUp className={`size-3 ${hasVoted ? "fill-current" : ""}`} />
         {idea.votes}
       </button>
     </div>
@@ -84,12 +103,16 @@ function Column({
   status,
   label,
   ideas,
+  currentUserId,
   onVote,
+  onDelete,
 }: {
   status: IdeaStatus
   label: string
   ideas: Idea[]
+  currentUserId: string
   onVote: (id: string) => void
+  onDelete: (id: string) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
   return (
@@ -105,7 +128,13 @@ function Column({
       </div>
       <div className="flex-1 space-y-2">
         {ideas.map((idea) => (
-          <IdeaCardDraggable key={idea.id} idea={idea} onVote={onVote} />
+          <IdeaCardDraggable
+            key={idea.id}
+            idea={idea}
+            currentUserId={currentUserId}
+            onVote={onVote}
+            onDelete={onDelete}
+          />
         ))}
       </div>
     </div>
@@ -294,11 +323,29 @@ export function TeamWorkspace({
   async function handleVote(ideaId: string) {
     const idea = ideas.find((i) => i.id === ideaId)
     if (!idea) return
-    const nextVotes = idea.votes + 1
-    setIdeas((prev) => prev.map((i) => (i.id === ideaId ? { ...i, votes: nextVotes } : i)))
+
+    const hasVoted = idea.voted_by.includes(currentUserId)
+    const nextVotedBy = hasVoted
+      ? idea.voted_by.filter((id) => id !== currentUserId)
+      : [...idea.voted_by, currentUserId]
+    const nextVotes = nextVotedBy.length
+
+    setIdeas((prev) =>
+      prev.map((i) => (i.id === ideaId ? { ...i, votes: nextVotes, voted_by: nextVotedBy } : i))
+    )
 
     const supabase = createClient()
-    await supabase.from("ideas").update({ votes: nextVotes }).eq("id", ideaId)
+    await supabase
+      .from("ideas")
+      .update({ votes: nextVotes, voted_by: nextVotedBy })
+      .eq("id", ideaId)
+  }
+
+  async function handleDeleteIdea(ideaId: string) {
+    setIdeas((prev) => prev.filter((i) => i.id !== ideaId))
+
+    const supabase = createClient()
+    await supabase.from("ideas").delete().eq("id", ideaId)
   }
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -376,7 +423,9 @@ export function TeamWorkspace({
                     status={col.status}
                     label={col.label}
                     ideas={ideas.filter((idea) => idea.status === col.status)}
+                    currentUserId={currentUserId}
                     onVote={handleVote}
+                    onDelete={handleDeleteIdea}
                   />
                 ))}
               </div>

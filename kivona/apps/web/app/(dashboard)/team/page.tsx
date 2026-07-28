@@ -56,7 +56,7 @@ export default async function TeamPage() {
         .eq("team_id", membership.team_id),
       supabase
         .from("ideas")
-        .select("id, team_id, author_id, title, content, status, votes")
+        .select("id, team_id, author_id, title, content, status, votes, voted_by")
         .eq("team_id", membership.team_id),
       supabase
         .from("icebreaker_responses")

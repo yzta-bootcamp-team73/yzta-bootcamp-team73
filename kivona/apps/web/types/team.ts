@@ -25,6 +25,7 @@ export interface Idea {
   content: string | null
   status: IdeaStatus
   votes: number
+  voted_by: string[]
 }
 
 export interface IcebreakerResponse {

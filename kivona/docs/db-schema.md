@@ -157,3 +157,19 @@ GRANT UPDATE ON public.team_members TO authenticated;
 ```
 
 > **Bilinen sınır:** `ideas`, `icebreaker_responses`, `messages` tablolarının RLS policy'leri "bu kullanıcı `team_members`'ta bu takımın satırına sahip mi" diye bakıyor, `status = 'accepted'` şartını kontrol etmiyor. Yani arayüz pending bir davetliyi Kabul/Red ekranına hapsediyor ama teorik olarak biri doğrudan API çağrısıyla henüz kabul etmediği takımın içeriğini okuyabilir. Bootcamp MVP'si için düşük risk (kimse öyle bir şey denemez) ama tam sıkılaştırmak istersen bu üç tablonun policy'lerine `AND team_members.status = 'accepted'` eklenmesi gerekir — istersen ayrıca yaparım.
+
+## Uygulanması gereken ek SQL (5. tur — fikir panosunda oy geri alma + silme)
+
+Oy butonu her tıklamada sayaçı sonsuza kadar artırıyordu (geri alma yoktu), eklenen fikirler de hiç silinemiyordu. İkisi de düzeltildi:
+
+```sql
+-- Kim oy verdi bilgisini tutan kolon — ayni kullanici tekrar tiklayinca oy geri aliniyor
+ALTER TABLE public.ideas ADD COLUMN IF NOT EXISTS voted_by UUID[] NOT NULL DEFAULT '{}';
+
+-- Takım üyeleri fikir silebilsin (mevcut UPDATE policy'sindeki gibi, yazar sartı yok)
+CREATE POLICY "Team members can delete ideas" ON public.ideas FOR DELETE USING (
+  EXISTS (SELECT 1 FROM public.team_members WHERE team_members.team_id = ideas.team_id AND team_members.user_id = auth.uid())
+);
+
+GRANT DELETE ON public.ideas TO authenticated;
+```
