@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 const ML_API_URL = process.env.ML_API_URL || "http://localhost:8000";
 
@@ -30,20 +29,36 @@ export async function POST() {
     if (!githubUsername) {
       return NextResponse.json(
         {
-          error: "GitHub kullanıcı adı bulunamadı",
+          error:
+            "GitHub hesabınız bağlı değil. Lütfen önce GitHub hesabınızı bağlayın.",
           needs_github: true,
         },
         { status: 400 }
       );
     }
 
-    // 3. provider_token'ı doğrudan session'dan al (veritabanından değil)
-    const providerToken = session.provider_token;
+    // 3. GitHub token'ı al: önce session'dan, yoksa user_metadata'dan
+    let providerToken = session.provider_token;
+
+    if (providerToken) {
+      // Session'da token varsa user_metadata'ya kaydet (gelecek kullanımlar için)
+      try {
+        await supabase.auth.updateUser({
+          data: { github_access_token: providerToken },
+        });
+      } catch (e) {
+        console.error("Token kaydetme hatası:", e);
+      }
+    } else {
+      // Session'da token yoksa user_metadata'dan al
+      providerToken = user.user_metadata?.github_access_token;
+    }
 
     if (!providerToken) {
       return NextResponse.json(
         {
-          error: "GitHub yetkilendirme token'ı bulunamadı. Lütfen GitHub ile tekrar giriş yapın.",
+          error:
+            "GitHub yetkilendirme token'ı bulunamadı. Lütfen GitHub hesabınızı yeniden bağlayın.",
           needs_github_reauth: true,
         },
         { status: 403 }
@@ -63,6 +78,31 @@ export async function POST() {
     if (!mlResponse.ok) {
       const errorData = await mlResponse.json().catch(() => ({}));
       console.error("ML API hatası:", mlResponse.status, errorData);
+
+      // GitHub token geçersiz veya süresi dolmuş olabilir
+      const errorDetail = String(errorData?.detail || "");
+      if (
+        mlResponse.status === 401 ||
+        mlResponse.status === 403 ||
+        errorDetail.toLowerCase().includes("401") ||
+        errorDetail.toLowerCase().includes("unauthorized") ||
+        errorDetail.toLowerCase().includes("bad credentials")
+      ) {
+        // Geçersiz token'ı user_metadata'dan temizle
+        await supabase.auth.updateUser({
+          data: { github_access_token: null },
+        });
+
+        return NextResponse.json(
+          {
+            error:
+              "GitHub token'ınızın süresi dolmuş. Lütfen GitHub hesabınızı yeniden bağlayın.",
+            needs_github_reauth: true,
+          },
+          { status: 403 }
+        );
+      }
+
       return NextResponse.json(
         {
           error:
@@ -74,14 +114,14 @@ export async function POST() {
 
     const analysisResult = await mlResponse.json();
 
-    // 5. Sonucu profiles tablosuna kaydet (user_metadata yerine)
+    // 5. Sonucu profiles tablosuna kaydet
     try {
       const { error: dbError } = await supabase
         .from('profiles')
         .update({
           github_username: githubUsername,
           role: analysisResult.primary_role,
-          skills: analysisResult.skills, // JSONB veya string[] formatında kaydedilir
+          skills: analysisResult.skills,
           ai_analysis: analysisResult,
         })
         .eq('id', user.id);

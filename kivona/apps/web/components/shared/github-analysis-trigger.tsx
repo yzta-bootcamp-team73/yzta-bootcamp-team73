@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Sparkles, Loader2, CheckCircle2, AlertCircle, TrendingUp, Code2, Target } from "lucide-react"
+import { Sparkles, Loader2, CheckCircle2, AlertCircle, TrendingUp, Code2, Target, Trash2 } from "lucide-react"
 import { Github } from "@/components/shared/icons"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -40,19 +40,24 @@ interface GitHubAnalysis {
 interface GitHubAnalysisTriggerProps {
   hasGitHub: boolean
   existingAnalysis: GitHubAnalysis | null
+  userId: string
 }
 
 export function GitHubAnalysisTrigger({
   hasGitHub,
   existingAnalysis,
+  userId,
 }: GitHubAnalysisTriggerProps) {
   const [status, setStatus] = useState<AnalysisStatus>("idle")
   const [analysis, setAnalysis] = useState<GitHubAnalysis | null>(existingAnalysis)
   const [errorMessage, setErrorMessage] = useState("")
+  const [needsReauth, setNeedsReauth] = useState(false)
+  const [isClearing, setIsClearing] = useState(false)
 
   const handleAnalyze = async () => {
     setStatus("loading")
     setErrorMessage("")
+    setNeedsReauth(false)
 
     try {
       const response = await fetch("/api/github/analyze", {
@@ -61,6 +66,9 @@ export function GitHubAnalysisTrigger({
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
+        if (data.needs_github_reauth || data.needs_github) {
+          setNeedsReauth(true)
+        }
         throw new Error(data.error || "Analiz başarısız oldu")
       }
 
@@ -75,6 +83,29 @@ export function GitHubAnalysisTrigger({
     } catch (err: any) {
       setErrorMessage(err.message || "Bilinmeyen bir hata oluştu")
       setStatus("error")
+    }
+  }
+
+  const handleClearAnalysis = async () => {
+    if (!window.confirm("Analiz verileriniz silinecek. Emin misiniz?")) return
+
+    setIsClearing(true)
+    const supabase = createClient()
+
+    try {
+      await supabase
+        .from("profiles")
+        .update({
+          ai_analysis: null,
+          skills: null,
+          role: null,
+        })
+        .eq("id", userId)
+
+      window.location.reload()
+    } catch (error) {
+      console.error("Analiz silinirken hata:", error)
+      setIsClearing(false)
     }
   }
 
@@ -213,26 +244,41 @@ export function GitHubAnalysisTrigger({
             </div>
           )}
 
-          {/* Re-analyze button */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={handleAnalyze}
-            disabled={status === "loading"}
-          >
-            {status === "loading" ? (
-              <>
+          {/* Re-analyze & Clear buttons */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={handleAnalyze}
+              disabled={status === "loading" || isClearing}
+            >
+              {status === "loading" ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Analiz Ediliyor...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="size-4" />
+                  Yeniden Analiz Et
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearAnalysis}
+              disabled={status === "loading" || isClearing}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              {isClearing ? (
                 <Loader2 className="size-4 animate-spin" />
-                Yeniden Analiz Ediliyor...
-              </>
-            ) : (
-              <>
-                <Sparkles className="size-4" />
-                Yeniden Analiz Et
-              </>
-            )}
-          </Button>
+              ) : (
+                <Trash2 className="size-4" />
+              )}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     )
@@ -248,7 +294,7 @@ export function GitHubAnalysisTrigger({
             AI Yetkinlik Analizi
           </CardTitle>
           <CardDescription>
-            Teknik yetkinliklerinizi analiz etmek için GitHub hesabınızı bağlayın.
+            GitHub hesabınız bağlı değil. Profil analizinizi yapabilmemiz için lütfen GitHub hesabınızı bağlayın.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -275,9 +321,21 @@ export function GitHubAnalysisTrigger({
       </CardHeader>
       <CardContent className="space-y-3">
         {status === "error" && (
-          <div className="flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-            <AlertCircle className="size-4 mt-0.5 shrink-0" />
-            <p>{errorMessage}</p>
+          <div className="space-y-3">
+            <div className="flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+              <AlertCircle className="size-4 mt-0.5 shrink-0" />
+              <p>{errorMessage}</p>
+            </div>
+            {needsReauth && (
+              <Button
+                onClick={handleConnectGitHub}
+                variant="outline"
+                className="w-full gap-2"
+              >
+                <Github className="size-4" />
+                GitHub Hesabını Yeniden Bağla
+              </Button>
+            )}
           </div>
         )}
 

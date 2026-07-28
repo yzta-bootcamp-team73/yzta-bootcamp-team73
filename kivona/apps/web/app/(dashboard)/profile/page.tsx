@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { GitHubAnalysisTrigger } from "@/components/shared/github-analysis-trigger"
+import { EditProfileDialog } from "@/components/shared/edit-profile-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export default async function ProfilePage() {
@@ -40,14 +41,22 @@ export default async function ProfilePage() {
 
   // GitHub analiz verileri 
   const analysis = profile?.ai_analysis || null;
+  const isAiAnalysis = analysis && !analysis.manual;
+  const isManualProfile = analysis?.manual === true;
   const hasGitHub = !!user?.user_metadata?.user_name;
 
   // Analiz varsa dinamik veri, yoksa boş
   const skills = analysis?.skills ?? [];
   const specializations = analysis?.specializations ?? [];
-  const primaryRole = analysis?.primary_role || "Geliştirici";
-  const summary = analysis?.professional_summary || "Yeni üye | Beceriler yakında AI tarafından analiz edilecek.";
-  const repositories = analysis?.repositories ?? [];
+  const primaryRole = analysis?.primary_role || profile?.role || "Geliştirici";
+  const summary = isAiAnalysis
+    ? (analysis.professional_summary || "Yeni üye | Beceriler yakında AI tarafından analiz edilecek.")
+    : "Yeni üye | Beceriler yakında AI tarafından analiz edilecek.";
+  const repositories = isAiAnalysis ? (analysis.repositories ?? []) : [];
+
+  // Manuel profil düzenleme için mevcut verileri hazırla
+  const manualSkillNames = skills.map((s: any) => typeof s === 'string' ? s : s.name).filter(Boolean);
+  const manualSpecNames = specializations as string[];
 
   const getConfidenceColor = (score: number) => {
     if (score >= 90) return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30";
@@ -94,64 +103,97 @@ export default async function ProfilePage() {
 
             <Separator />
 
-            {/* Skills — GitHub repolarındaki dil dağılımına göre */}
+            {/* Skills */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">
-                Yetenekler
-                <span className="ml-2 text-xs font-normal text-muted-foreground">
-                  GitHub repolarına göre
-                </span>
-              </h3>
+              <div className="flex items-center">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Yetenekler
+                  {isAiAnalysis && (
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                      GitHub repolarına göre
+                    </span>
+                  )}
+                </h3>
+                {isManualProfile && user && (
+                  <EditProfileDialog
+                    userId={user.id}
+                    currentRole={primaryRole}
+                    currentSkills={manualSkillNames}
+                    currentSpecializations={manualSpecNames}
+                    triggerVariant="icon"
+                  />
+                )}
+              </div>
               {skills.length > 0 ? (
-                <TooltipProvider delay={200}>
+                isAiAnalysis ? (
+                  <TooltipProvider delay={200}>
+                    <div className="flex flex-wrap gap-2">
+                      {skills.map((skill: any) => (
+                        <Tooltip key={skill.name}>
+                          <TooltipTrigger className="cursor-help">
+                            <Badge 
+                              variant="outline" 
+                              className={`flex items-center gap-1.5 px-2.5 py-1 transition-colors hover:brightness-95 dark:hover:brightness-110 ${getConfidenceColor(skill.confidence || 0)}`}
+                            >
+                              {skill.name}
+                              {skill.confidence && (
+                                <span className="text-[10px] font-bold opacity-70">
+                                  %{skill.confidence}
+                                </span>
+                              )}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent sideOffset={8} className="max-w-xs p-3">
+                            <div className="font-semibold text-sm border-b pb-1.5 mb-2 flex items-center gap-2">
+                              <Sparkles className="size-3.5 text-primary" />
+                              AI Karar Detayı
+                            </div>
+                            {skill.reasons?.length > 0 ? (
+                              <ul className="space-y-1.5">
+                                {skill.reasons.map((reason: string, idx: number) => (
+                                  <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5 leading-snug">
+                                    <span className="mt-1 size-1 shrink-0 rounded-full bg-primary/60" />
+                                    <span>{reason}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">Genel analiz sonucu eklendi.</p>
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  </TooltipProvider>
+                ) : (
                   <div className="flex flex-wrap gap-2">
                     {skills.map((skill: any) => (
-                      <Tooltip key={skill.name}>
-                        <TooltipTrigger className="cursor-help">
-                          <Badge 
-                            variant="outline" 
-                            className={`flex items-center gap-1.5 px-2.5 py-1 transition-colors hover:brightness-95 dark:hover:brightness-110 ${getConfidenceColor(skill.confidence || 0)}`}
-                          >
-                            {skill.name}
-                            {skill.confidence && (
-                              <span className="text-[10px] font-bold opacity-70">
-                                %{skill.confidence}
-                              </span>
-                            )}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent sideOffset={8} className="max-w-xs p-3">
-                          <div className="font-semibold text-sm border-b pb-1.5 mb-2 flex items-center gap-2">
-                            <Sparkles className="size-3.5 text-primary" />
-                            AI Karar Detayı
-                          </div>
-                          {skill.reasons?.length > 0 ? (
-                            <ul className="space-y-1.5">
-                              {skill.reasons.map((reason: string, idx: number) => (
-                                <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5 leading-snug">
-                                  <span className="mt-1 size-1 shrink-0 rounded-full bg-primary/60" />
-                                  <span>{reason}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <p className="text-xs text-muted-foreground">Genel analiz sonucu eklendi.</p>
-                          )}
-                        </TooltipContent>
-                      </Tooltip>
+                      <Badge key={skill.name || skill} variant="outline" className="px-2.5 py-1">
+                        {skill.name || skill}
+                      </Badge>
                     ))}
                   </div>
-                </TooltipProvider>
+                )
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  GitHub profilinizi analiz ettirerek yeteneklerinizi otomatik olarak belirleyebilirsiniz.
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Henüz yetenek bilgisi eklenmedi. GitHub analizi yaparak veya manuel olarak profilini doldurabilirsin.
+                  </p>
+                  {user && (
+                    <EditProfileDialog
+                      userId={user.id}
+                      currentRole=""
+                      currentSkills={[]}
+                      currentSpecializations={[]}
+                    />
+                  )}
+                </div>
               )}
             </div>
 
             <Separator />
 
-            {/* Specializations & Looking For */}
+            {/* Specializations */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">
                 Uzmanlık Alanları
@@ -166,7 +208,9 @@ export default async function ProfilePage() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Analiz sonrasında uzmanlık alanlarınız burada görünecek.
+                  {skills.length > 0
+                    ? "Uzmanlık alanı belirtilmedi."
+                    : "Profil doldurulduktan sonra uzmanlık alanlarınız burada görünecek."}
                 </p>
               )}
             </div>
@@ -202,7 +246,8 @@ export default async function ProfilePage() {
           {/* AI Analysis Card — Now interactive */}
           <GitHubAnalysisTrigger
             hasGitHub={hasGitHub}
-            existingAnalysis={analysis}
+            existingAnalysis={isAiAnalysis ? analysis : null}
+            userId={user?.id || ""}
           />
 
           {/* GitHub Repos Card */}
