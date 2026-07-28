@@ -173,3 +173,33 @@ CREATE POLICY "Team members can delete ideas" ON public.ideas FOR DELETE USING (
 
 GRANT DELETE ON public.ideas TO authenticated;
 ```
+
+## Uygulanması gereken ek SQL (6. tur — takım lideri üye çıkarabilsin)
+
+Şu ana kadar `team_members` DELETE policy'si sadece "kendi satırını sil" (ayrılma) izni veriyordu. Takımı kuran kişinin (`teams.created_by`) **başka üyeleri de çıkarabilmesi** için ek bir policy:
+
+```sql
+CREATE POLICY "Team creator can remove members" ON public.team_members FOR DELETE USING (
+  EXISTS (SELECT 1 FROM public.teams WHERE teams.id = team_members.team_id AND teams.created_by = auth.uid())
+);
+```
+
+`GRANT DELETE ON public.team_members` zaten 1. turda verilmişti, tekrar gerekmiyor.
+
+## Bilinen veri sorunu — kullanıcı başına 1 takım kısıtı muhtemelen hiç uygulanmadı
+
+`team_members_user_id_unique` kısıtını eklemeye çalıştığımız SQL, o anda zaten birden fazla takımda kaydı olan bir kullanıcı varsa **sessizce başarısız olur** (Postgres, mevcut veriyle çelişen bir UNIQUE kısıtı eklenmesine izin vermez). Kısıtın gerçekten var olup olmadığını kontrol edin:
+
+```sql
+SELECT conname FROM pg_constraint WHERE conname = 'team_members_user_id_unique';
+```
+
+Boş dönerse: önce birden fazla takımda görünen kullanıcıları tespit edip (aşağıdaki sorgu) hangi takımda kalacaklarına karar verin, fazlalık satırları silin, sonra kısıtı tekrar eklemeyi deneyin.
+
+```sql
+SELECT user_id, array_agg(team_id) AS teams, count(*)
+FROM public.team_members
+WHERE status = 'accepted'
+GROUP BY user_id
+HAVING count(*) > 1;
+```

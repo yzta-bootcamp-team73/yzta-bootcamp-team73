@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core"
-import { Plus, ThumbsUp, Shuffle, UserPlus, LogOut, X } from "lucide-react"
+import { Plus, ThumbsUp, Shuffle, UserPlus, LogOut, X, UserMinus, Crown } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -248,6 +248,12 @@ export function TeamWorkspace({
     const supabase = createClient()
     await supabase.from("team_members").delete().eq("team_id", team.id).eq("user_id", currentUserId)
     router.refresh()
+  }
+
+  async function handleRemoveMember(memberId: string) {
+    setMembers((prev) => prev.filter((member) => member.id !== memberId))
+    const supabase = createClient()
+    await supabase.from("team_members").delete().eq("team_id", team.id).eq("user_id", memberId)
   }
 
   async function handleInvite(e: FormEvent) {
@@ -498,26 +504,75 @@ export function TeamWorkspace({
           Takım Üyeleri ({members.length}/{team.max_members})
         </h2>
         <div className="space-y-2">
-          {members.map((member) => (
-            <div
-              key={member.id}
-              className="flex items-center gap-3 rounded-lg border border-border p-2"
-            >
-              <Avatar size="sm">
-                <AvatarFallback>
-                  {(member.full_name ?? "?").slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="flex-1 truncate text-sm text-foreground">
-                {member.full_name ?? "İsimsiz"}
-              </span>
-              {member.status === "pending" && (
-                <Badge variant="outline" className="text-xs">
-                  Bekliyor
-                </Badge>
-              )}
-            </div>
-          ))}
+          {members.map((member) => {
+            const isLeader = member.id === team.created_by
+            const canRemove = currentUserId === team.created_by && !isLeader
+            return (
+              <div
+                key={member.id}
+                className="flex items-center gap-3 rounded-lg border border-border p-2"
+              >
+                <Avatar size="sm">
+                  <AvatarFallback>
+                    {(member.full_name ?? "?").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="flex-1 truncate text-sm text-foreground">
+                  {member.full_name ?? "İsimsiz"}
+                </span>
+                {isLeader && (
+                  <Badge variant="outline" className="gap-1 text-xs">
+                    <Crown className="size-3" />
+                    Takım Lideri
+                  </Badge>
+                )}
+                {member.status === "pending" && (
+                  <Badge variant="outline" className="text-xs">
+                    Bekliyor
+                  </Badge>
+                )}
+                {canRemove && (
+                  <Dialog>
+                    <DialogTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="shrink-0 text-muted-foreground hover:text-destructive"
+                        />
+                      }
+                    >
+                      <UserMinus className="size-3.5" />
+                      <span className="sr-only">Üyeyi Çıkar</span>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-sm">
+                      <DialogHeader>
+                        <DialogTitle>
+                          {member.full_name ?? "Bu kişiyi"} takımdan çıkarılsın mı?
+                        </DialogTitle>
+                        <DialogDescription>
+                          Bu işlem geri alınamaz, kişi tekrar davet edilene kadar takıma erişemez.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter className="sm:justify-end gap-2">
+                        <DialogClose render={<Button variant="outline" />}>Vazgeç</DialogClose>
+                        <DialogClose
+                          render={
+                            <Button
+                              variant="destructive"
+                              onClick={() => handleRemoveMember(member.id)}
+                            />
+                          }
+                        >
+                          Evet, Çıkar
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+            )
+          })}
         </div>
 
         {members.length < team.max_members && (
