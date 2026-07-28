@@ -1,7 +1,10 @@
+export type MembershipStatus = "pending" | "accepted"
+
 export interface TeamMemberProfile {
   id: string
   full_name: string | null
   avatar_url: string | null
+  status?: MembershipStatus
 }
 
 export interface Team {
@@ -22,6 +25,7 @@ export interface Idea {
   content: string | null
   status: IdeaStatus
   votes: number
+  voted_by: string[]
 }
 
 export interface IcebreakerResponse {
@@ -37,4 +41,14 @@ export interface JoinableTeam {
   name: string
   description: string | null
   max_members: number
+}
+
+export interface TeamMessage {
+  id: string
+  team_id: string
+  user_id: string
+  content: string | null
+  file_path: string | null
+  file_name: string | null
+  created_at: string
 }

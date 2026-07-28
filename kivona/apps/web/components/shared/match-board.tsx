@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion } from "framer-motion"
 import { Users, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -70,49 +71,56 @@ export function MatchBoard({
         <TabsContent value={activeRole} className="mt-6">
           {filtered.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((profile) => {
+              {filtered.map((profile, i) => {
                 const compatibility = computeCompatibility(mySkills, profile.skills)
                 return (
-                  <Card key={profile.id}>
-                    <CardHeader className="flex-row items-center gap-3">
-                      <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-primary">
-                        {initialsOf(profile.fullName)}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <CardTitle className="truncate text-base">
-                          {profile.fullName}
-                        </CardTitle>
-                        <CardDescription>{roleLabels[profile.role]}</CardDescription>
-                      </div>
-                      {mySkills.length > 0 && (
-                        <Badge
-                          className={
-                            compatibility >= 30
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : "bg-accent/60 text-primary"
-                          }
-                        >
-                          %{compatibility} Uyum
-                        </Badge>
-                      )}
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="line-clamp-2 text-sm text-muted-foreground">
-                        {profile.bio}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {profile.skills.map((skill) => (
-                          <Badge key={skill} variant="secondary">
-                            {skill}
+                  <motion.div
+                    key={profile.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: i * 0.04, ease: "easeOut" }}
+                  >
+                    <Card>
+                      <CardHeader className="flex-row items-center gap-3">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-primary">
+                          {initialsOf(profile.fullName)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <CardTitle className="truncate text-base">
+                            {profile.fullName}
+                          </CardTitle>
+                          <CardDescription>{roleLabels[profile.role]}</CardDescription>
+                        </div>
+                        {mySkills.length > 0 && (
+                          <Badge
+                            className={
+                              compatibility >= 30
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                : "bg-accent/60 text-primary"
+                            }
+                          >
+                            %{compatibility} Uyum
                           </Badge>
-                        ))}
-                      </div>
-                      <Button variant="outline" size="sm" className="w-full gap-2" disabled>
-                        <Sparkles className="size-3.5" />
-                        Takıma Davet Et (Yakında)
-                      </Button>
-                    </CardContent>
-                  </Card>
+                        )}
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <p className="line-clamp-2 text-sm text-muted-foreground">
+                          {profile.bio}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {profile.skills.map((skill) => (
+                            <Badge key={skill} variant="secondary">
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                        <Button variant="outline" size="sm" className="w-full gap-2" disabled>
+                          <Sparkles className="size-3.5" />
+                          Takıma Davet Et (Yakında)
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 )
               })}
             </div>

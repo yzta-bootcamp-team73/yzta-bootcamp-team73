@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core"
-import { Plus, ThumbsUp, Shuffle, UserPlus } from "lucide-react"
+import { Plus, ThumbsUp, Shuffle, UserPlus, LogOut, X, UserMinus, Crown } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,13 +11,25 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog"
 import { icebreakerQuestions } from "@/lib/data/icebreaker-questions"
+import { TeamChat } from "@/components/shared/team-chat"
 import type {
   Team,
   TeamMemberProfile,
   Idea,
   IdeaStatus,
   IcebreakerResponse,
+  TeamMessage,
 } from "@/types/team"
 
 const columns: { status: IdeaStatus; label: string }[] = [
@@ -27,10 +40,14 @@ const columns: { status: IdeaStatus; label: string }[] = [
 
 function IdeaCardDraggable({
   idea,
+  currentUserId,
   onVote,
+  onDelete,
 }: {
   idea: Idea
+  currentUserId: string
   onVote: (id: string) => void
+  onDelete: (id: string) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: idea.id,
@@ -38,6 +55,7 @@ function IdeaCardDraggable({
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined
+  const hasVoted = idea.voted_by.includes(currentUserId)
 
   return (
     <div
@@ -45,22 +63,38 @@ function IdeaCardDraggable({
       style={style}
       {...listeners}
       {...attributes}
-      className={`cursor-grab space-y-2 rounded-lg border border-border bg-card p-3 shadow-sm active:cursor-grabbing ${
+      className={`group cursor-grab space-y-2 rounded-lg border border-border bg-card p-3 shadow-sm active:cursor-grabbing ${
         isDragging ? "z-10 opacity-50" : ""
       }`}
     >
-      <p className="text-sm font-medium text-foreground">{idea.title}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-medium text-foreground">{idea.title}</p>
+        <button
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete(idea.id)
+          }}
+          className="shrink-0 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+        >
+          <X className="size-3.5" />
+          <span className="sr-only">Fikri sil</span>
+        </button>
+      </div>
       {idea.content && (
         <p className="line-clamp-2 text-xs text-muted-foreground">{idea.content}</p>
       )}
       <button
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation()
           onVote(idea.id)
         }}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+        className={`flex items-center gap-1 text-xs transition-colors ${
+          hasVoted ? "font-medium text-primary" : "text-muted-foreground hover:text-primary"
+        }`}
       >
-        <ThumbsUp className="size-3" />
+        <ThumbsUp className={`size-3 ${hasVoted ? "fill-current" : ""}`} />
         {idea.votes}
       </button>
     </div>
@@ -71,12 +105,16 @@ function Column({
   status,
   label,
   ideas,
+  currentUserId,
   onVote,
+  onDelete,
 }: {
   status: IdeaStatus
   label: string
   ideas: Idea[]
+  currentUserId: string
   onVote: (id: string) => void
+  onDelete: (id: string) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
   return (
@@ -92,7 +130,13 @@ function Column({
       </div>
       <div className="flex-1 space-y-2">
         {ideas.map((idea) => (
-          <IdeaCardDraggable key={idea.id} idea={idea} onVote={onVote} />
+          <IdeaCardDraggable
+            key={idea.id}
+            idea={idea}
+            currentUserId={currentUserId}
+            onVote={onVote}
+            onDelete={onDelete}
+          />
         ))}
       </div>
     </div>
@@ -105,13 +149,16 @@ export function TeamWorkspace({
   currentUserId,
   initialIdeas,
   initialIcebreakers,
+  initialMessages,
 }: {
   team: Team
   initialMembers: TeamMemberProfile[]
   currentUserId: string
   initialIdeas: Idea[]
   initialIcebreakers: IcebreakerResponse[]
+  initialMessages: TeamMessage[]
 }) {
+  const router = useRouter()
   const [members, setMembers] = useState(initialMembers)
   const [ideas, setIdeas] = useState(initialIdeas)
   const [icebreakers, setIcebreakers] = useState(initialIcebreakers)
@@ -120,7 +167,96 @@ export function TeamWorkspace({
   const [answer, setAnswer] = useState("")
   const [inviteUsername, setInviteUsername] = useState("")
   const [inviteError, setInviteError] = useState<string | null>(null)
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null)
   const [inviteLoading, setInviteLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState("kanban")
+  const [messages, setMessages] = useState(initialMessages)
+  const [isUploading, setIsUploading] = useState(false)
+  const [lastReadMessagesAt, setLastReadMessagesAt] = useState<Date | null>(null)
+  const [isLeaving, setIsLeaving] = useState(false)
+
+  const lastMessage = messages[messages.length - 1]
+  const hasUnreadMessages =
+    activeTab !== "messages" &&
+    Boolean(lastMessage) &&
+    (!lastReadMessagesAt || new Date(lastMessage.created_at) > lastReadMessagesAt)
+
+  function handleTabChange(value: string) {
+    setActiveTab(value)
+    if (value === "messages") {
+      setLastReadMessagesAt(new Date())
+    }
+  }
+
+  // Takım kanalını dinleyip başkalarının gönderdiği mesajları anlık ekliyoruz.
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`messages:${team.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `team_id=eq.${team.id}` },
+        (payload) => {
+          setMessages((prev) =>
+            prev.some((m) => m.id === (payload.new as TeamMessage).id)
+              ? prev
+              : [...prev, payload.new as TeamMessage]
+          )
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [team.id])
+
+  function handleSendMessage(content: string) {
+    const supabase = createClient()
+    supabase
+      .from("messages")
+      .insert({ team_id: team.id, user_id: currentUserId, content })
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data as TeamMessage]))
+        }
+      })
+  }
+
+  async function handleUploadFile(file: File) {
+    setIsUploading(true)
+    const supabase = createClient()
+    const path = `${team.id}/${Date.now()}-${file.name}`
+
+    const { error: uploadError } = await supabase.storage.from("team-files").upload(path, file)
+    if (!uploadError) {
+      const { data, error } = await supabase
+        .from("messages")
+        .insert({ team_id: team.id, user_id: currentUserId, file_path: path, file_name: file.name })
+        .select()
+        .single()
+
+      if (!error && data) {
+        setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data as TeamMessage]))
+      }
+    }
+    setIsUploading(false)
+  }
+
+  async function handleLeaveTeam() {
+    setIsLeaving(true)
+    const supabase = createClient()
+    await supabase.from("team_members").delete().eq("team_id", team.id).eq("user_id", currentUserId)
+    router.refresh()
+  }
+
+  async function handleRemoveMember(memberId: string) {
+    setMembers((prev) => prev.filter((member) => member.id !== memberId))
+    const supabase = createClient()
+    await supabase.from("team_members").delete().eq("team_id", team.id).eq("user_id", memberId)
+  }
 
   async function handleInvite(e: FormEvent) {
     e.preventDefault()
@@ -129,6 +265,7 @@ export function TeamWorkspace({
 
     setInviteLoading(true)
     setInviteError(null)
+    setInviteSuccess(null)
     const supabase = createClient()
 
     const { data: profile, error: profileError } = await supabase
@@ -144,27 +281,28 @@ export function TeamWorkspace({
     }
 
     if (members.some((member) => member.id === profile.id)) {
-      setInviteError("Bu kişi zaten takımda.")
+      setInviteError("Bu kişiye zaten davet gönderilmiş ya da takımda.")
       setInviteLoading(false)
       return
     }
 
     const { error: insertError } = await supabase
       .from("team_members")
-      .insert({ team_id: team.id, user_id: profile.id })
+      .insert({ team_id: team.id, user_id: profile.id, status: "pending" })
 
     if (insertError) {
       setInviteError(
         insertError.code === "23505"
-          ? "Bu kişi zaten başka bir takımda."
+          ? "Bu kişi zaten bir takımda ya da bekleyen bir daveti var."
           : `Eklenemedi: ${insertError.message}`
       )
       setInviteLoading(false)
       return
     }
 
-    setMembers((prev) => [...prev, profile as TeamMemberProfile])
+    setMembers((prev) => [...prev, { ...(profile as TeamMemberProfile), status: "pending" }])
     setInviteUsername("")
+    setInviteSuccess("Davet gönderildi, kabul etmesini bekliyoruz.")
     setInviteLoading(false)
   }
 
@@ -193,11 +331,29 @@ export function TeamWorkspace({
   async function handleVote(ideaId: string) {
     const idea = ideas.find((i) => i.id === ideaId)
     if (!idea) return
-    const nextVotes = idea.votes + 1
-    setIdeas((prev) => prev.map((i) => (i.id === ideaId ? { ...i, votes: nextVotes } : i)))
+
+    const hasVoted = idea.voted_by.includes(currentUserId)
+    const nextVotedBy = hasVoted
+      ? idea.voted_by.filter((id) => id !== currentUserId)
+      : [...idea.voted_by, currentUserId]
+    const nextVotes = nextVotedBy.length
+
+    setIdeas((prev) =>
+      prev.map((i) => (i.id === ideaId ? { ...i, votes: nextVotes, voted_by: nextVotedBy } : i))
+    )
 
     const supabase = createClient()
-    await supabase.from("ideas").update({ votes: nextVotes }).eq("id", ideaId)
+    await supabase
+      .from("ideas")
+      .update({ votes: nextVotes, voted_by: nextVotedBy })
+      .eq("id", ideaId)
+  }
+
+  async function handleDeleteIdea(ideaId: string) {
+    setIdeas((prev) => prev.filter((i) => i.id !== ideaId))
+
+    const supabase = createClient()
+    await supabase.from("ideas").delete().eq("id", ideaId)
   }
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -242,10 +398,16 @@ export function TeamWorkspace({
           )}
         </div>
 
-        <Tabs defaultValue="kanban">
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="kanban">Fikir Panosu</TabsTrigger>
             <TabsTrigger value="icebreaker">Buz Kırıcı</TabsTrigger>
+            <TabsTrigger value="messages" className="relative">
+              Mesajlar
+              {hasUnreadMessages && (
+                <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-destructive" />
+              )}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="kanban" className="mt-6 space-y-4">
@@ -261,7 +423,7 @@ export function TeamWorkspace({
               </Button>
             </form>
 
-            <DndContext onDragEnd={handleDragEnd}>
+            <DndContext id="team-kanban" onDragEnd={handleDragEnd}>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {columns.map((col) => (
                   <Column
@@ -269,7 +431,9 @@ export function TeamWorkspace({
                     status={col.status}
                     label={col.label}
                     ideas={ideas.filter((idea) => idea.status === col.status)}
+                    currentUserId={currentUserId}
                     onVote={handleVote}
+                    onDelete={handleDeleteIdea}
                   />
                 ))}
               </div>
@@ -322,6 +486,17 @@ export function TeamWorkspace({
               ))}
             </div>
           </TabsContent>
+
+          <TabsContent value="messages" className="mt-6">
+            <TeamChat
+              currentUserId={currentUserId}
+              members={members}
+              messages={messages}
+              onSend={handleSendMessage}
+              onUploadFile={handleUploadFile}
+              isUploading={isUploading}
+            />
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -331,27 +506,81 @@ export function TeamWorkspace({
           Takım Üyeleri ({members.length}/{team.max_members})
         </h2>
         <div className="space-y-2">
-          {members.map((member) => (
-            <div
-              key={member.id}
-              className="flex items-center gap-3 rounded-lg border border-border p-2"
-            >
-              <Avatar size="sm">
-                <AvatarFallback>
-                  {(member.full_name ?? "?").slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="truncate text-sm text-foreground">
-                {member.full_name ?? "İsimsiz"}
-              </span>
-            </div>
-          ))}
+          {members.map((member) => {
+            const isLeader = member.id === team.created_by
+            const canRemove = currentUserId === team.created_by && !isLeader
+            return (
+              <div
+                key={member.id}
+                className="flex items-center gap-3 rounded-lg border border-border p-2"
+              >
+                <Avatar size="sm">
+                  <AvatarFallback>
+                    {(member.full_name ?? "?").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="flex-1 truncate text-sm text-foreground">
+                  {member.full_name ?? "İsimsiz"}
+                </span>
+                {isLeader && (
+                  <Badge variant="outline" className="gap-1 text-xs">
+                    <Crown className="size-3" />
+                    Takım Lideri
+                  </Badge>
+                )}
+                {member.status === "pending" && (
+                  <Badge variant="outline" className="text-xs">
+                    Bekliyor
+                  </Badge>
+                )}
+                {canRemove && (
+                  <Dialog>
+                    <DialogTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="shrink-0 text-muted-foreground hover:text-destructive"
+                        />
+                      }
+                    >
+                      <UserMinus className="size-3.5" />
+                      <span className="sr-only">Üyeyi Çıkar</span>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-sm">
+                      <DialogHeader>
+                        <DialogTitle>
+                          {member.full_name ?? "Bu kişiyi"} takımdan çıkarılsın mı?
+                        </DialogTitle>
+                        <DialogDescription>
+                          Bu işlem geri alınamaz, kişi tekrar davet edilene kadar takıma erişemez.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter className="sm:justify-end gap-2">
+                        <DialogClose render={<Button variant="outline" />}>Vazgeç</DialogClose>
+                        <DialogClose
+                          render={
+                            <Button
+                              variant="destructive"
+                              onClick={() => handleRemoveMember(member.id)}
+                            />
+                          }
+                        >
+                          Evet, Çıkar
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+            )
+          })}
         </div>
 
         {members.length < team.max_members && (
           <form onSubmit={handleInvite} className="space-y-2 border-t border-border pt-3">
             <label className="text-xs font-medium text-muted-foreground">
-              GitHub kullanıcı adıyla üye ekle
+              GitHub kullanıcı adıyla davet et
             </label>
             <div className="flex gap-2">
               <Input
@@ -366,12 +595,45 @@ export function TeamWorkspace({
                 className="shrink-0"
               >
                 <UserPlus className="size-4" />
-                <span className="sr-only">Ekle</span>
+                <span className="sr-only">Davet Et</span>
               </Button>
             </div>
             {inviteError && <p className="text-xs text-destructive">{inviteError}</p>}
+            {inviteSuccess && <p className="text-xs text-emerald-600 dark:text-emerald-400">{inviteSuccess}</p>}
           </form>
         )}
+
+        <Dialog>
+          <DialogTrigger
+            render={
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full gap-1.5 text-destructive hover:text-destructive"
+              />
+            }
+          >
+            <LogOut className="size-3.5" />
+            Takımdan Ayrıl
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Takımdan ayrılmak istediğine emin misin?</DialogTitle>
+              <DialogDescription>
+                &quot;{team.name}&quot; takımından ayrılırsın, tekrar katılmak için davet edilmen ya
+                da yeniden katılman gerekir.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="sm:justify-end gap-2">
+              <DialogClose render={<Button variant="outline" disabled={isLeaving} />}>
+                Vazgeç
+              </DialogClose>
+              <Button variant="destructive" onClick={handleLeaveTeam} disabled={isLeaving}>
+                {isLeaving ? "Ayrılınıyor..." : "Evet, Ayrıl"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
