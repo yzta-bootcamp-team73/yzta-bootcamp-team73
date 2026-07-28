@@ -11,12 +11,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { icebreakerQuestions } from "@/lib/data/icebreaker-questions"
+import { TeamChat } from "@/components/shared/team-chat"
 import type {
   Team,
   TeamMemberProfile,
   Idea,
   IdeaStatus,
   IcebreakerResponse,
+  TeamMessage,
 } from "@/types/team"
 
 const columns: { status: IdeaStatus; label: string }[] = [
@@ -105,12 +107,14 @@ export function TeamWorkspace({
   currentUserId,
   initialIdeas,
   initialIcebreakers,
+  initialMessages,
 }: {
   team: Team
   initialMembers: TeamMemberProfile[]
   currentUserId: string
   initialIdeas: Idea[]
   initialIcebreakers: IcebreakerResponse[]
+  initialMessages: TeamMessage[]
 }) {
   const [members, setMembers] = useState(initialMembers)
   const [ideas, setIdeas] = useState(initialIdeas)
@@ -246,6 +250,7 @@ export function TeamWorkspace({
           <TabsList>
             <TabsTrigger value="kanban">Fikir Panosu</TabsTrigger>
             <TabsTrigger value="icebreaker">Buz Kırıcı</TabsTrigger>
+            <TabsTrigger value="messages">Mesajlar</TabsTrigger>
           </TabsList>
 
           <TabsContent value="kanban" className="mt-6 space-y-4">
@@ -321,6 +326,15 @@ export function TeamWorkspace({
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          <TabsContent value="messages" className="mt-6">
+            <TeamChat
+              teamId={team.id}
+              currentUserId={currentUserId}
+              members={members}
+              initialMessages={initialMessages}
+            />
           </TabsContent>
         </Tabs>
       </div>

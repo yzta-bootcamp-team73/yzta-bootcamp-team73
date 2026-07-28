@@ -84,4 +84,57 @@ INSERT INTO public.competitions (title, platform, url, description, category, pr
 ('Web3 Gaming Hackathon', 'mlh', 'https://mlh.io/events/web3-gaming', 'Blockchain tabanlı oyunlar ve NFT ekonomileri geliştirin. Play-to-earn mekanikleri ve on-chain varlık yönetimi.', 'blockchain', '$60,000', '2026-08-30T23:59:00Z', 'linear-gradient(135deg, #E11D48, #FB7185)');
 ```
 
+## Uygulanması gereken ek SQL (3. tur — takım içi mesajlaşma + dosya paylaşımı)
+
+Aşağıdakiler `/team` sayfasına eklenen "Mesajlar" sekmesi için gerekli — **SQL Editor'da bir kez çalıştırılması gerekiyor:**
+
+```sql
+-- 1) Mesajlar tablosu (metin ve/veya dosya eki içerebilir)
+CREATE TABLE public.messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  team_id UUID REFERENCES public.teams(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES public.profiles(id),
+  content TEXT,
+  file_path TEXT,   -- Storage'daki dosya yolu (ör. "{team_id}/167..-dosya.pdf")
+  file_name TEXT,   -- Kullanıcıya gösterilecek orijinal dosya adı
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Team members can view messages" ON public.messages FOR SELECT USING (
+  EXISTS (SELECT 1 FROM public.team_members WHERE team_members.team_id = messages.team_id AND team_members.user_id = auth.uid())
+);
+CREATE POLICY "Team members can send messages" ON public.messages FOR INSERT WITH CHECK (
+  auth.uid() = user_id AND EXISTS (SELECT 1 FROM public.team_members WHERE team_members.team_id = messages.team_id AND team_members.user_id = auth.uid())
+);
+
+GRANT SELECT, INSERT ON public.messages TO authenticated;
+
+-- 2) Realtime: bu tablodaki değişiklikler anlık olarak tüm takım üyelerine yayınlansın
+ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+
+-- 3) Dosya paylaşımı için özel (private) bir Storage bucket'ı
+INSERT INTO storage.buckets (id, name, public) VALUES ('team-files', 'team-files', false)
+ON CONFLICT (id) DO NOTHING;
+
+-- Sadece o takımın klasörüne (path'in ilk parçası team_id) o takımın üyeleri erişebilsin
+CREATE POLICY "Team members can upload team files" ON storage.objects FOR INSERT WITH CHECK (
+  bucket_id = 'team-files'
+  AND (storage.foldername(name))[1]::uuid IN (
+    SELECT team_id FROM public.team_members WHERE user_id = auth.uid()
+  )
+);
+CREATE POLICY "Team members can view team files" ON storage.objects FOR SELECT USING (
+  bucket_id = 'team-files'
+  AND (storage.foldername(name))[1]::uuid IN (
+    SELECT team_id FROM public.team_members WHERE user_id = auth.uid()
+  )
+);
+```
+
+> Storage bucket'ı SQL ile oluşturmak çalışmazsa (bazı projelerde `storage.buckets`'a SQL Editor'dan doğrudan yazma kısıtlı olabilir), alternatif olarak Supabase Dashboard → **Storage** → **New bucket** → adı `team-files`, "Public bucket" **kapalı** (private) olarak elle de oluşturulabilir. Policy'ler (INSERT/SELECT) her durumda SQL Editor'dan çalıştırılmalı.
+>
+> Görüntülü görüşme (WebRTC) bu turda **eklenmedi** — kendi altyapınızla haftalar süren bir iş; ileride gerekirse Daily.co/LiveKit gibi hazır bir SDK ile günler seviyesinde eklenebilir.
+
 > Bu SQL'ler Supabase projesine **manuel olarak** SQL Editor'dan uygulanmalıdır — repo içinde otomatik migration çalıştıran bir araç (örn. Supabase CLI migrations) henüz kurulu değil.
