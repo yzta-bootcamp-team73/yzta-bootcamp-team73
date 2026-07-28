@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion } from "framer-motion"
 import { Calendar, Trophy } from "lucide-react"
 import type { Competition } from "@/lib/data/competitions"
 import { Badge } from "@/components/ui/badge"
@@ -123,11 +124,15 @@ export function DiscoverBoard({ competitions }: { competitions: Competition[] })
         <TabsContent value={activeTab} className="mt-6">
           {filteredCompetitions.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredCompetitions.map((competition) => (
-                <CompetitionCard
+              {filteredCompetitions.map((competition, i) => (
+                <motion.div
                   key={competition.id}
-                  competition={competition}
-                />
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: i * 0.04, ease: "easeOut" }}
+                >
+                  <CompetitionCard competition={competition} />
+                </motion.div>
               ))}
             </div>
           ) : (

@@ -84,4 +84,122 @@ INSERT INTO public.competitions (title, platform, url, description, category, pr
 ('Web3 Gaming Hackathon', 'mlh', 'https://mlh.io/events/web3-gaming', 'Blockchain tabanlı oyunlar ve NFT ekonomileri geliştirin. Play-to-earn mekanikleri ve on-chain varlık yönetimi.', 'blockchain', '$60,000', '2026-08-30T23:59:00Z', 'linear-gradient(135deg, #E11D48, #FB7185)');
 ```
 
-> Bu SQL'ler Supabase projesine **manuel olarak** SQL Editor'dan uygulanmalıdır — repo içinde otomatik migration çalıştıran bir araç (örn. Supabase CLI migrations) henüz kurulu değil.
+## Uygulanması gereken ek SQL (3. tur — takım içi mesajlaşma + dosya paylaşımı)
+
+Aşağıdakiler `/team` sayfasına eklenen "Mesajlar" sekmesi için gerekli — **SQL Editor'da bir kez çalıştırılması gerekiyor:**
+
+```sql
+-- 1) Mesajlar tablosu (metin ve/veya dosya eki içerebilir)
+CREATE TABLE public.messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  team_id UUID REFERENCES public.teams(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES public.profiles(id),
+  content TEXT,
+  file_path TEXT,   -- Storage'daki dosya yolu (ör. "{team_id}/167..-dosya.pdf")
+  file_name TEXT,   -- Kullanıcıya gösterilecek orijinal dosya adı
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Team members can view messages" ON public.messages FOR SELECT USING (
+  EXISTS (SELECT 1 FROM public.team_members WHERE team_members.team_id = messages.team_id AND team_members.user_id = auth.uid())
+);
+CREATE POLICY "Team members can send messages" ON public.messages FOR INSERT WITH CHECK (
+  auth.uid() = user_id AND EXISTS (SELECT 1 FROM public.team_members WHERE team_members.team_id = messages.team_id AND team_members.user_id = auth.uid())
+);
+
+GRANT SELECT, INSERT ON public.messages TO authenticated;
+
+-- 2) Realtime: bu tablodaki değişiklikler anlık olarak tüm takım üyelerine yayınlansın
+ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+
+-- 3) Dosya paylaşımı için özel (private) bir Storage bucket'ı
+INSERT INTO storage.buckets (id, name, public) VALUES ('team-files', 'team-files', false)
+ON CONFLICT (id) DO NOTHING;
+
+-- Sadece o takımın klasörüne (path'in ilk parçası team_id) o takımın üyeleri erişebilsin
+CREATE POLICY "Team members can upload team files" ON storage.objects FOR INSERT WITH CHECK (
+  bucket_id = 'team-files'
+  AND (storage.foldername(name))[1]::uuid IN (
+    SELECT team_id FROM public.team_members WHERE user_id = auth.uid()
+  )
+);
+CREATE POLICY "Team members can view team files" ON storage.objects FOR SELECT USING (
+  bucket_id = 'team-files'
+  AND (storage.foldername(name))[1]::uuid IN (
+    SELECT team_id FROM public.team_members WHERE user_id = auth.uid()
+  )
+);
+```
+
+> Storage bucket'ı SQL ile oluşturmak çalışmazsa (bazı projelerde `storage.buckets`'a SQL Editor'dan doğrudan yazma kısıtlı olabilir), alternatif olarak Supabase Dashboard → **Storage** → **New bucket** → adı `team-files`, "Public bucket" **kapalı** (private) olarak elle de oluşturulabilir. Policy'ler (INSERT/SELECT) her durumda SQL Editor'dan çalıştırılmalı.
+>
+> Görüntülü görüşme (WebRTC) bu turda **eklenmedi** — kendi altyapınızla haftalar süren bir iş; ileride gerekirse Daily.co/LiveKit gibi hazır bir SDK ile günler seviyesinde eklenebilir.
+
+## Uygulanması gereken ek SQL (4. tur — takıma davet "kabul et/reddet" akışı)
+
+Önceden "GitHub kullanıcı adıyla üye ekle" formu kişiyi **doğrudan** takıma ekliyordu. Artık bir davet oluşturuyor; karşı taraf `/team` sayfasını açtığında kabul/red seçeneğiyle karşılaşıyor, kabul edene kadar takımın içeriğini (Kanban, mesajlar, buz kırıcı) göremiyor.
+
+```sql
+-- team_members'a durum kolonu — mevcut satırlar (zaten kurulmuş/katılmış üyeler) varsayılan olarak 'accepted' sayılır
+ALTER TABLE public.team_members ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'accepted';
+-- status: 'pending' (davet gönderildi, cevap bekleniyor) | 'accepted'
+
+-- Kullanıcı kendi adına gelen daveti kabul edebilsin (status'u 'accepted' yapabilsin)
+CREATE POLICY "Users can respond to their own invite" ON public.team_members FOR UPDATE USING (
+  auth.uid() = user_id
+) WITH CHECK (
+  auth.uid() = user_id
+);
+
+GRANT UPDATE ON public.team_members TO authenticated;
+```
+
+> **Bilinen sınır:** `ideas`, `icebreaker_responses`, `messages` tablolarının RLS policy'leri "bu kullanıcı `team_members`'ta bu takımın satırına sahip mi" diye bakıyor, `status = 'accepted'` şartını kontrol etmiyor. Yani arayüz pending bir davetliyi Kabul/Red ekranına hapsediyor ama teorik olarak biri doğrudan API çağrısıyla henüz kabul etmediği takımın içeriğini okuyabilir. Bootcamp MVP'si için düşük risk (kimse öyle bir şey denemez) ama tam sıkılaştırmak istersen bu üç tablonun policy'lerine `AND team_members.status = 'accepted'` eklenmesi gerekir — istersen ayrıca yaparım.
+
+## Uygulanması gereken ek SQL (5. tur — fikir panosunda oy geri alma + silme)
+
+Oy butonu her tıklamada sayaçı sonsuza kadar artırıyordu (geri alma yoktu), eklenen fikirler de hiç silinemiyordu. İkisi de düzeltildi:
+
+```sql
+-- Kim oy verdi bilgisini tutan kolon — ayni kullanici tekrar tiklayinca oy geri aliniyor
+ALTER TABLE public.ideas ADD COLUMN IF NOT EXISTS voted_by UUID[] NOT NULL DEFAULT '{}';
+
+-- Takım üyeleri fikir silebilsin (mevcut UPDATE policy'sindeki gibi, yazar sartı yok)
+CREATE POLICY "Team members can delete ideas" ON public.ideas FOR DELETE USING (
+  EXISTS (SELECT 1 FROM public.team_members WHERE team_members.team_id = ideas.team_id AND team_members.user_id = auth.uid())
+);
+
+GRANT DELETE ON public.ideas TO authenticated;
+```
+
+## Uygulanması gereken ek SQL (6. tur — takım lideri üye çıkarabilsin)
+
+Şu ana kadar `team_members` DELETE policy'si sadece "kendi satırını sil" (ayrılma) izni veriyordu. Takımı kuran kişinin (`teams.created_by`) **başka üyeleri de çıkarabilmesi** için ek bir policy:
+
+```sql
+CREATE POLICY "Team creator can remove members" ON public.team_members FOR DELETE USING (
+  EXISTS (SELECT 1 FROM public.teams WHERE teams.id = team_members.team_id AND teams.created_by = auth.uid())
+);
+```
+
+`GRANT DELETE ON public.team_members` zaten 1. turda verilmişti, tekrar gerekmiyor.
+
+## Bilinen veri sorunu — kullanıcı başına 1 takım kısıtı muhtemelen hiç uygulanmadı
+
+`team_members_user_id_unique` kısıtını eklemeye çalıştığımız SQL, o anda zaten birden fazla takımda kaydı olan bir kullanıcı varsa **sessizce başarısız olur** (Postgres, mevcut veriyle çelişen bir UNIQUE kısıtı eklenmesine izin vermez). Kısıtın gerçekten var olup olmadığını kontrol edin:
+
+```sql
+SELECT conname FROM pg_constraint WHERE conname = 'team_members_user_id_unique';
+```
+
+Boş dönerse: önce birden fazla takımda görünen kullanıcıları tespit edip (aşağıdaki sorgu) hangi takımda kalacaklarına karar verin, fazlalık satırları silin, sonra kısıtı tekrar eklemeyi deneyin.
+
+```sql
+SELECT user_id, array_agg(team_id) AS teams, count(*)
+FROM public.team_members
+WHERE status = 'accepted'
+GROUP BY user_id
+HAVING count(*) > 1;
+```
