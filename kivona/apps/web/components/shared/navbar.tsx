@@ -1,9 +1,11 @@
 "use client"
 
+import type { User } from "@supabase/supabase-js"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MobileSidebar } from "@/components/shared/sidebar"
+import { ThemeToggle } from "@/components/shared/theme-toggle"
 
-export default function Navbar({ user }: { user: any }) {
+export default function Navbar({ user }: { user: User | null }) {
   const avatarUrl = user?.user_metadata?.avatar_url;
   const initials = user?.user_metadata?.full_name?.substring(0, 2).toUpperCase() || "KU";
   return (
@@ -22,8 +24,9 @@ export default function Navbar({ user }: { user: any }) {
       {/* Mobile spacer to push avatar right */}
       <div className="flex-1 md:hidden" />
 
-      {/* User avatar (always visible) */}
+      {/* Tema butonu + kullanıcı avatarı (her zaman görünür) */}
       <div className="flex items-center gap-3">
+        <ThemeToggle />
         <Avatar>
           {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
           <AvatarFallback>{initials}</AvatarFallback>

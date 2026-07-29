@@ -2,6 +2,7 @@ import Sidebar from "@/components/shared/sidebar"
 import Navbar from "@/components/shared/navbar"
 import { createClient } from "@/lib/supabase/server"
 import { NameOnboarding } from "@/components/shared/name-onboarding"
+import { PageTransition } from "@/components/shared/page-transition"
 
 export default async function DashboardLayout({
   children,
@@ -20,7 +21,7 @@ export default async function DashboardLayout({
       <div className="flex flex-1 flex-col md:pl-64">
         <Navbar user={user} />
         <main className="flex-1 overflow-y-auto bg-background p-6">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </main>
       </div>
     </div>

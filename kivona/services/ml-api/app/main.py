@@ -1,6 +1,12 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import match
+
+from app.routers import github_router
+
+logging.basicConfig(level=logging.INFO)
+
 
 app = FastAPI(
     title="Kivona ML API",
@@ -13,12 +19,13 @@ app.include_router(match.router)
 # CORS — Next.js frontend'den gelen isteklere izin ver
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(github_router.router, prefix="/api/v1")
 
 @app.get("/health")
 async def health_check():

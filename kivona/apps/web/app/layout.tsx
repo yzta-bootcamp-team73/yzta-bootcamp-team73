@@ -1,6 +1,21 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
+
+// Sayfa boyanmadan önce senkron çalışıp .dark class'ını ayarlar — next-themes'in
+// kullandığı JSX-render script yöntemi React 19 ile "script tag" uyarısı ve
+// hydration mismatch'e yol açtığı için next/script (beforeInteractive) ile
+// Next.js'in resmi desteklediği yoldan yapılıyor.
+const THEME_INIT_SCRIPT = `
+(function () {
+  try {
+    var stored = localStorage.getItem("kivona-theme");
+    var isDark = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.classList.toggle("dark", isDark);
+  } catch (e) {}
+})();
+`;
 
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",
@@ -29,8 +44,14 @@ export default function RootLayout({
     <html
       lang="tr"
       className={`${ibmPlexSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Script id="theme-init" strategy="beforeInteractive">
+          {THEME_INIT_SCRIPT}
+        </Script>
+        {children}
+      </body>
     </html>
   );
 }

@@ -9,8 +9,21 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // GitHub provider_token'ı varsa user_metadata'ya kaydet (kalıcı kullanım için)
+      const session = data.session;
+      if (session?.provider_token && session?.user) {
+        try {
+          await supabase.auth.updateUser({
+            data: { github_access_token: session.provider_token },
+          });
+        } catch (e) {
+          // Token kaydetme hatası login akışını engellemesin
+          console.error("GitHub token kaydetme hatası:", e);
+        }
+      }
+
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === "development";
       if (isLocalEnv) {

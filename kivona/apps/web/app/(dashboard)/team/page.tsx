@@ -1,30 +1,93 @@
-import { UsersRound } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/lib/supabase/server"
+import { CreateOrJoinTeam } from "@/components/shared/create-or-join-team"
+import { TeamWorkspace } from "@/components/shared/team-workspace"
+import { PendingInvite } from "@/components/shared/pending-invite"
+import type {
+  Idea,
+  IcebreakerResponse,
+  TeamMemberProfile,
+  TeamMessage,
+  MembershipStatus,
+} from "@/types/team"
 
-export default function TeamPage() {
+export default async function TeamPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return null
+
+  const { data: membership } = await supabase
+    .from("team_members")
+    .select("team_id, status")
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (!membership) {
+    const { data: openTeams } = await supabase
+      .from("teams")
+      .select("id, name, description, max_members")
+      .limit(20)
+
+    return <CreateOrJoinTeam userId={user.id} openTeams={openTeams ?? []} />
+  }
+
+  const { data: team } = await supabase
+    .from("teams")
+    .select("id, name, description, max_members, created_by")
+    .eq("id", membership.team_id)
+    .single()
+
+  if (!team) {
+    // Takım kaydı bulunamadı (silinmiş olabilir) — güvenli düşüş
+    return <CreateOrJoinTeam userId={user.id} openTeams={[]} />
+  }
+
+  if (membership.status === "pending") {
+    return <PendingInvite team={team} currentUserId={user.id} />
+  }
+
+  const [{ data: memberRows }, { data: ideas }, { data: icebreakers }, { data: messages }] =
+    await Promise.all([
+      supabase
+        .from("team_members")
+        .select("user_id, status, profiles(id, full_name, avatar_url)")
+        .eq("team_id", membership.team_id),
+      supabase
+        .from("ideas")
+        .select("id, team_id, author_id, title, content, status, votes, voted_by")
+        .eq("team_id", membership.team_id),
+      supabase
+        .from("icebreaker_responses")
+        .select("id, team_id, user_id, question, answer")
+        .eq("team_id", membership.team_id),
+      supabase
+        .from("messages")
+        .select("id, team_id, user_id, content, file_path, file_name, created_at")
+        .eq("team_id", membership.team_id)
+        .order("created_at", { ascending: true })
+        .limit(100),
+    ])
+
+  const members: TeamMemberProfile[] = (memberRows ?? [])
+    .map((row): TeamMemberProfile | null => {
+      const { profiles, status } = row as unknown as {
+        profiles: TeamMemberProfile | null
+        status: MembershipStatus
+      }
+      return profiles ? { ...profiles, status } : null
+    })
+    .filter((profile): profile is TeamMemberProfile => Boolean(profile))
+
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center px-4 relative overflow-hidden">
-      {/* Subtle Background */}
-      <div className="absolute inset-0 bg-subtle-pattern opacity-40 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/20 blur-[100px] rounded-full pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col items-center max-w-md gap-6">
-        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center border border-border">
-          <UsersRound className="w-10 h-10 text-muted-foreground" />
-        </div>
-        
-        <div className="flex flex-col items-center gap-3">
-          <Badge variant="outline" className="text-primary border-primary/30 bg-primary/5">
-            Yakında
-          </Badge>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Takım Çalışma Alanı
-          </h1>
-          <p className="text-muted-foreground">
-            Takımını kurduktan sonra burası senin çalışma alanın olacak. Kanban panosu, fikir havuzu ve daha fazlası.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+    <TeamWorkspace
+      team={team}
+      initialMembers={members}
+      currentUserId={user.id}
+      initialIdeas={(ideas as Idea[] | null) ?? []}
+      initialIcebreakers={(icebreakers as IcebreakerResponse[] | null) ?? []}
+      initialMessages={(messages as TeamMessage[] | null) ?? []}
+    />
+  )
 }
