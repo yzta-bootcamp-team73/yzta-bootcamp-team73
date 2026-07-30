@@ -1,8 +1,12 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import match
+from dotenv import load_dotenv
 
+# .env dosyasını otomatik yükle
+load_dotenv()
+
+from app.routers import match
 from app.routers import github_router
 
 logging.basicConfig(level=logging.INFO)
