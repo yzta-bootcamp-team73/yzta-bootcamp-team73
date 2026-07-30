@@ -56,7 +56,7 @@ export function SampleMatchCard({ showMatchScore = true, count = 2 }: { showMatc
         .not("top_skills", "is", null)
         .limit(20);
         
-      let fetchedProfiles = [];
+      let fetchedProfiles: typeof DUMMY_PROFILES = [];
       if (!error && data && data.length > 0) {
         // Shuffle
         const shuffled = data.sort(() => 0.5 - Math.random());
