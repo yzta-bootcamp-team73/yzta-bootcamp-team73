@@ -8,16 +8,18 @@ class ProfileAnalyzer:
     def __init__(self):
         # Layer 2: Predefined role/specialization profiles
         self.role_profiles = {
-            "Frontend Developer": "react angular vue css html javascript typescript ui ux component responsive web browser dom",
-            "Backend Developer": "api rest graphql server database sql nosql authentication middleware microservice endpoint",
-            "Full-Stack Developer": "frontend backend fullstack full-stack api react database deployment docker",
-            "Data Scientist": "machine learning deep learning neural network tensorflow pytorch pandas numpy sklearn model training dataset",
-            "ML Engineer": "machine learning pipeline mlops model deployment inference training data feature engineering",
-            "DevOps Engineer": "docker kubernetes ci cd pipeline deployment infrastructure terraform ansible monitoring",
-            "Mobile Developer": "android ios swift kotlin react native flutter mobile app",
-            "Game Developer": "game engine unity unreal godot opengl directx shader 3d 2d",
-            "Embedded/IoT Developer": "embedded firmware arduino raspberry microcontroller sensor iot hardware",
-            "Security Engineer": "security vulnerability penetration testing cryptography authentication authorization"
+            "Frontend Developer": "react angular vue svelte next.js nuxt tailwind css html javascript typescript ui ux component responsive dom web browser vite webpack state management redux animation accessibility",
+            "Backend Developer": "api rest graphql grpc server database sql nosql postgresql mongodb redis authentication authorization jwt middleware microservice endpoint django flask fastapi spring boot express nestjs laravel prisma supabase",
+            "Full-Stack Developer": "frontend backend fullstack full-stack api react next.js node database deployment docker postgresql mongodb typescript javascript rest graphql serverless tailwind",
+            "Mobile Developer": "android ios swift kotlin react native flutter dart xcode android studio mobile app ui navigation jetpack compose swiftui sqlite",
+            "Data Scientist": "machine learning deep learning neural network tensorflow pytorch pandas numpy scikit-learn sklearn scipy data analysis visualization matplotlib seaborn jupyter statistics dataset model training",
+            "Data Analyst": "sql excel tableau powerbi dashboard data analysis visualization metrics kpi reporting etl bigquery snowflake analytics statistical",
+            "ML Engineer": "machine learning pipeline mlops model deployment inference training data feature engineering mlflow kubeflow sagemaker tensorrt model optimization serving",
+            "AI Developer": "llm generative ai application integration api openai anthropic claude langchain llamaindex rag prompt engineering prompting agent chatbot vector database pinecone weaviate hugging face",
+            "DevOps Engineer": "docker kubernetes k8s ci cd pipeline deployment infrastructure terraform ansible monitoring prometheus grafana aws azure gcp bash linux jenkins github actions argocd serverless",
+            "Game Developer": "game engine unity unreal godot opengl directx vulkan shader 3d 2d physics multiplayer c++ c# blueprint graphics rendering",
+            "Desktop Developer": "windows macos linux wpf winforms electron tauri qt gtk c++ c# .net java javafx desktop application cross-platform",
+            "Cybersecurity": "security vulnerability penetration testing cryptography authentication authorization hacking exploit firewall malware reversing ctf owasp network protocol forensics"
         }
         
         # Layer 3: Rule-based taxonomy
