@@ -52,8 +52,8 @@ export function SampleMatchCard({ showMatchScore = true, count = 2 }: { showMatc
       const supabase = createClient();
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, avatar_url, primary_role, top_skills")
-        .not("top_skills", "is", null)
+        .select("full_name, avatar_url, github_metadata")
+        .not("github_metadata", "is", null)
         .limit(20);
         
       let fetchedProfiles: typeof DUMMY_PROFILES = [];
@@ -61,19 +61,30 @@ export function SampleMatchCard({ showMatchScore = true, count = 2 }: { showMatc
         // Shuffle
         const shuffled = data.sort(() => 0.5 - Math.random());
         fetchedProfiles = shuffled.slice(0, count).map(p => {
-          let skills: string[] = [];
-          if (Array.isArray(p.top_skills)) skills = p.top_skills;
-          else if (typeof p.top_skills === "string") {
-            try { skills = JSON.parse(p.top_skills); } catch(e) {}
+          let skills = ["React", "TypeScript", "Next.js"];
+          let role = "Yazılım Geliştirici";
+          let score = Math.floor(Math.random() * 10) + 90;
+
+          if (p.github_metadata && p.github_metadata.recommendation_metadata) {
+            const meta = p.github_metadata.recommendation_metadata;
+            if (meta.strongest_languages && meta.strongest_languages.length > 0) {
+              skills = meta.strongest_languages.slice(0, 3);
+            }
+            if (meta.preferred_roles && meta.preferred_roles.length > 0) {
+              role = meta.preferred_roles[0].role || role;
+            }
+            // activity_score can act as a realistic match score, capped or adjusted if needed, but let's just use it directly if it's high enough, else fallback
+            if (meta.activity_score && meta.activity_score > 70) {
+               score = Math.min(99, meta.activity_score + 10);
+            }
           }
-          if (skills.length === 0) skills = ["React", "TypeScript", "Next.js"];
           
           return {
             full_name: p.full_name || "Kivona Kullanıcısı",
             avatar_url: p.avatar_url || "",
-            primary_role: p.primary_role || "Yazılım Geliştirici",
-            top_skills: skills.slice(0, 3), // Max 3 yetenek
-            match_score: Math.floor(Math.random() * 10) + 90, // 90-99
+            primary_role: role,
+            top_skills: skills, // Max 3 yetenek
+            match_score: score, // 90-99
           };
         });
       }
