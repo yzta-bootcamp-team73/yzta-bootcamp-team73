@@ -9,6 +9,7 @@ export interface DemoProfile {
   lookingFor: string[]
   bio: string
   matchScore?: number
+  avatarUrl?: string
 }
 
 export const roleLabels: Record<DemoRole, string> = {
@@ -31,6 +32,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["TypeScript", "React", "CSS"],
     lookingFor: ["Backend Geliştirici", "Veri Bilimci"],
     bio: "Frontend'de 3 yıllık deneyim, etkileşimli arayüzlere meraklı.",
+    avatarUrl: "https://github.com/zeynepy.png",
   },
   {
     id: "p2",
@@ -40,6 +42,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["Python", "Go", "Docker"],
     lookingFor: ["Frontend Geliştirici", "Tasarımcı"],
     bio: "Backend ve altyapı odaklı, ölçeklenebilir API'ler kurmayı seviyor.",
+    avatarUrl: "https://github.com/mertd.png",
   },
   {
     id: "p3",
@@ -49,6 +52,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["Python", "Jupyter Notebook", "R"],
     lookingFor: ["Frontend Geliştirici"],
     bio: "Veri analizi ve makine öğrenmesi modelleri üzerine çalışıyor.",
+    avatarUrl: "https://github.com/elifk.png",
   },
   {
     id: "p4",
@@ -58,6 +62,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["Figma", "CSS", "HTML"],
     lookingFor: ["Frontend Geliştirici", "Backend Geliştirici"],
     bio: "Ürün tasarımı ve kullanıcı deneyimi odaklı, hızlı prototipleme yapar.",
+    avatarUrl: "https://github.com/canozturk.png",
   },
   {
     id: "p5",
@@ -67,6 +72,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["JavaScript", "Vue", "Node.js"],
     lookingFor: ["Veri Bilimci", "Tasarımcı"],
     bio: "Full-stack geliştirici, küçük ekiplerde hızlı MVP çıkarmayı sever.",
+    avatarUrl: "https://github.com/selina.png",
   },
   {
     id: "p6",
@@ -76,6 +82,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["Notion", "Jira"],
     lookingFor: ["Geliştirici", "Tasarımcı", "Veri Bilimci"],
     bio: "Ürün yönetimi ve ekip koordinasyonunda deneyimli, hackathon organizasyonlarına katılmış.",
+    avatarUrl: "https://github.com/buraks.png",
   },
   {
     id: "p7",
@@ -85,6 +92,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["Python", "TensorFlow", "SQL"],
     lookingFor: ["Backend Geliştirici"],
     bio: "NLP ve derin öğrenme projelerinde çalışıyor, Kaggle yarışmalarına katılıyor.",
+    avatarUrl: "https://github.com/aysey.png",
   },
   {
     id: "p8",
@@ -94,6 +102,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["Java", "Kotlin", "Android"],
     lookingFor: ["Tasarımcı", "Veri Bilimci"],
     bio: "Mobil uygulama geliştirme konusunda uzman, Android ekosistemine hakim.",
+    avatarUrl: "https://github.com/keremaydin.png",
   },
   {
     id: "p9",
@@ -103,6 +112,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["Figma", "Illustrator"],
     lookingFor: ["Frontend Geliştirici"],
     bio: "Marka ve arayüz tasarımı yapıyor, görsel hikaye anlatımına önem veriyor.",
+    avatarUrl: "https://github.com/denizkoc.png",
   },
   {
     id: "p10",
@@ -112,6 +122,7 @@ export const demoProfiles: DemoProfile[] = [
     skills: ["TypeScript", "React", "Python"],
     lookingFor: ["Veri Bilimci", "Proje Yöneticisi"],
     bio: "Hem frontend hem backend'de rahat, önceki 2 hackathon'da dereceye girdi.",
+    avatarUrl: "https://github.com/emrepolat.png",
   },
 ]
 
