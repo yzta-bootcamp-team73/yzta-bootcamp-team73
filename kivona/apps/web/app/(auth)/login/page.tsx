@@ -6,6 +6,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles } from "lucide-react";
 import { Github } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { SampleMatchCard } from "@/components/shared/sample-match-card";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -206,44 +207,8 @@ export default function LoginPage() {
           </div>
 
           {/* Match Card Preview */}
-          <div className="bg-card border border-border rounded-xl p-8 shadow-xl shadow-muted/50 w-full max-w-md">
-            <div className="flex items-start justify-between mb-8">
-              <div className="flex items-center gap-4">
-                {/* Avatar */}
-                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-accent bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
-                  <span className="text-lg font-semibold text-primary">ZY</span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-foreground">
-                    Zeynep Yılmaz
-                  </h3>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-primary" />
-                    Frontend Geliştirici
-                  </p>
-                </div>
-              </div>
-
-              {/* Match Score Badge */}
-              <div className="bg-accent border border-[#b4c5ff] rounded-full px-3 py-1 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-accent-foreground" />
-                <span className="text-xs font-bold text-accent-foreground">
-                  %98 Uyum
-                </span>
-              </div>
-            </div>
-
-            {/* Skill Tags */}
-            <div className="flex flex-wrap gap-2">
-              {["React", "Three.js", "Tailwind"].map((skill) => (
-                <span
-                  key={skill}
-                  className="bg-muted border border-border rounded-md px-3 py-1 text-xs font-semibold text-muted-foreground"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
+          <div className="w-full max-w-md">
+            <SampleMatchCard />
           </div>
         </div>
       </aside>

@@ -82,49 +82,7 @@ function Navbar() {
   );
 }
 
-/* ─────────────────────────────────────────────
-   Hero – Sample Match Card
-   ───────────────────────────────────────────── */
-function SampleMatchCard() {
-  return (
-    <div className="relative mx-auto mt-16 w-full max-w-sm">
-      {/* Glow behind card */}
-      <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl" />
-
-      <Card className="relative border-border/60 shadow-kivona-lg">
-        <CardHeader className="flex-row items-center gap-4">
-          {/* Avatar placeholder */}
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent text-lg font-semibold text-primary">
-            ZY
-          </div>
-          <div className="min-w-0 flex-1">
-            <CardTitle className="text-base font-semibold text-foreground">
-              Zeynep Yılmaz
-            </CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
-              Frontend Geliştirici
-            </CardDescription>
-          </div>
-          <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
-            %98 Uyum
-          </Badge>
-        </CardHeader>
-
-        <CardContent className="flex flex-wrap gap-2">
-          {["React", "Three.js", "Tailwind"].map((skill) => (
-            <Badge
-              key={skill}
-              variant="secondary"
-              className="bg-accent/60 text-primary font-medium"
-            >
-              {skill}
-            </Badge>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+import { SampleMatchCard } from "@/components/shared/sample-match-card";
 
 /* ─────────────────────────────────────────────
    Hero Section
@@ -208,7 +166,11 @@ function HeroSection() {
 
         {/* Sample Match Card */}
         <motion.div initial="hidden" animate="visible" custom={4} variants={fadeUp}>
-          <SampleMatchCard />
+          <div className="relative mx-auto mt-16 w-full max-w-sm">
+            {/* Glow behind card */}
+            <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl" />
+            <SampleMatchCard />
+          </div>
         </motion.div>
       </div>
     </section>
@@ -251,7 +213,7 @@ function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section header */}
         <div className="mx-auto max-w-2xl text-center">
-          <Badge variant="secondary" className="mb-4 text-sm">
+          <Badge variant="secondary" className="mb-4 text-sm bg-secondary text-secondary-foreground border-border">
             Özellikler
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -274,7 +236,7 @@ function FeaturesSection() {
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
               >
-                <Card className="group h-full border-border/60 transition-all duration-300 hover:shadow-kivona-lg hover:-translate-y-1">
+                <Card className="group h-full border-border/60 transition-all duration-300 hover:shadow-kivona-lg hover:-translate-y-1 bg-card">
                   <CardHeader>
                     <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-accent">
                       <Icon className="size-6 text-primary" />
@@ -325,12 +287,12 @@ function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="relative bg-kivona-surface-low py-24 lg:py-32"
+      className="relative bg-secondary/30 py-24 lg:py-32"
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section header */}
         <div className="mx-auto max-w-2xl text-center">
-          <Badge variant="secondary" className="mb-4 text-sm">
+          <Badge variant="secondary" className="mb-4 text-sm bg-secondary text-secondary-foreground border-border">
             Adımlar
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -356,7 +318,7 @@ function HowItWorksSection() {
               className="relative flex flex-col items-center text-center"
             >
               {/* Step number */}
-              <div className="relative z-10 flex size-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white shadow-lg shadow-primary/25">
+              <div className="relative z-10 flex size-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-lg shadow-primary/25">
                 {step.step}
               </div>
 
@@ -379,10 +341,10 @@ function HowItWorksSection() {
    ───────────────────────────────────────────── */
 function CtaSection() {
   return (
-    <section className="relative overflow-hidden bg-[#1B2540] py-24 lg:py-32">
+    <section className="relative overflow-hidden bg-primary py-24 lg:py-32">
       {/* Decorative gradient */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 size-[600px] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
+        <div className="absolute -top-40 left-1/2 size-[600px] -translate-x-1/2 rounded-full bg-white/10 blur-[120px]" />
       </div>
 
       <motion.div
@@ -392,12 +354,12 @@ function CtaSection() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative z-10 mx-auto max-w-3xl px-6 text-center lg:px-8"
       >
-        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-          Bu maceraya bugün
+        <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl lg:text-5xl">
+          Hayalindeki Takımı
           <br />
-          <span className="text-kivona-blue-dim">bugün başla.</span>
+          <span className="text-primary-foreground/80">Kivona İle Kur.</span>
         </h2>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-white/60">
+        <p className="mx-auto mt-6 max-w-xl text-lg text-primary-foreground/80">
           GitHub hesabınla giriş yap, AI profilini oluştursun ve sana en uygun
           takım arkadaşlarını bulsun.
         </p>
@@ -405,7 +367,7 @@ function CtaSection() {
           <Button
             variant="default"
             size="lg"
-            className="h-12 px-8 text-base font-semibold bg-white text-primary hover:bg-white/90"
+            className="h-12 px-8 text-base font-semibold bg-background text-foreground hover:bg-background/90"
             nativeButton={false}
             render={<Link href="/login" />}
           >

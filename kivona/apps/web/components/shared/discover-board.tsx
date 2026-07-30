@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Trophy } from "lucide-react"
+import { Calendar, Trophy, Info, ExternalLink } from "lucide-react"
 import type { Competition } from "@/lib/data/competitions"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -144,6 +144,63 @@ export function DiscoverBoard({ competitions }: { competitions: Competition[] })
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Partnership & Real Competitions Callout */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="mt-12 rounded-xl border border-primary/20 bg-primary/5 p-6 shadow-sm"
+      >
+        <div className="flex flex-col sm:flex-row items-start gap-4">
+          <div className="rounded-full bg-primary/10 p-2 text-primary shrink-0">
+            <Info className="size-5" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">
+              Daha Fazla Etkinlik ve Yarışma Nerede?
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+              Şu an platformumuzda gördüğünüz etkinlikler, Kivona'nın akıllı eşleşme konseptini sergilemek amacıyla listelenmektedir.
+              Vizyonumuz; gelecekte teknoloji odaklı kariyer platformları ve organizatörlerle resmi B2B (kurumsal) anlaşmalar yaparak, 
+              Türkiye'deki ve dünyadaki tüm proje çağrılarını ve teknoloji yarışmalarını tek bir merkezde toplamaktır.
+              Biz bu entegrasyonları tamamlayana kadar, güncel fırsatlara aşağıdaki platformlardan göz atabilirsiniz:
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <a href="https://devpost.com/hackathons" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                Devpost <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+              <a href="https://www.hackerearth.com/challenges/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                HackerEarth <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+              <a href="https://mlh.io/seasons/2026/events" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                MLH <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+              <a href="https://www.kaggle.com/competitions" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                Kaggle <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+              <a href="https://www.topcoder.com/challenges" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                Topcoder <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+              <a href="https://www.teknofest.org/tr/competitions/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                Teknofest <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+              <a href="https://www.techcareer.net/events" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                Techcareer.net <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+              <a href="https://www.patika.dev/bootcamp" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                Patika.dev <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+              <a href="https://coderspace.io/etkinlikler/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                Coderspace <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+              <a href="https://tubitak.gov.tr/tr/yarismalar" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm border border-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                TÜBİTAK <ExternalLink className="size-3.5 opacity-70" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }

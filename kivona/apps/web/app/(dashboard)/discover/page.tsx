@@ -29,16 +29,38 @@ function mapRow(row: CompetitionRow): Competition {
 }
 
 export default async function DiscoverPage() {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from("competitions")
-    .select("id, title, platform, url, description, category, prize, deadline, image_url")
-    .order("deadline", { ascending: true })
+  let competitions: Competition[] = []
+  const mlApiUrl = process.env.ML_API_URL || "http://localhost:8000"
 
-  // Supabase'deki competitions tablosu henüz seed edilmemişse (ya da erişilemezse)
-  // statik örnek verilere düşerek sayfanın boş görünmesini engelliyoruz.
-  const competitions =
-    data && data.length > 0 ? (data as CompetitionRow[]).map(mapRow) : seedCompetitions
+  // 1. Try to fetch live hackathons from Devpost RSS via our ML-API
+  try {
+    const res = await fetch(`${mlApiUrl}/api/v1/hackathons`, { 
+      cache: 'no-store' 
+    })
+    if (res.ok) {
+      const result = await res.json()
+      if (result.status === "success" && result.data.length > 0) {
+        competitions = result.data.map((item: any) => ({
+          ...item,
+          imageUrl: item.image_url // map snake_case to camelCase
+        }))
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch live hackathons:", error)
+  }
+
+  // 2. Fallback to Supabase if live API fails or returns empty
+  if (competitions.length === 0) {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from("competitions")
+      .select("id, title, platform, url, description, category, prize, deadline, image_url")
+      .order("deadline", { ascending: true })
+
+    competitions = data && data.length > 0 ? (data as CompetitionRow[]).map(mapRow) : seedCompetitions
+  }
 
   return <DiscoverBoard competitions={competitions} />
 }
+

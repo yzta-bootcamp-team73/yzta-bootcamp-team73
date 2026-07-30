@@ -13,6 +13,7 @@ import {
 import { Github } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { SampleMatchCard } from "@/components/shared/sample-match-card";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -246,40 +247,9 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          {/* Feature Highlights */}
-          <div className="flex flex-col gap-4 w-full">
-            {[
-              {
-                icon: "🤖",
-                title: "AI Profil Analizi",
-                desc: "GitHub repolarını otomatik analiz eder",
-              },
-              {
-                icon: "🎯",
-                title: "Akıllı Eşleştirme",
-                desc: "Yeteneklerine uygun takım arkadaşları bulur",
-              },
-              {
-                icon: "🏆",
-                title: "Etkinlik Keşfi",
-                desc: "Güncel yarışmaları tek panoda toplar",
-              },
-            ].map((feature) => (
-              <div
-                key={feature.title}
-                className="flex items-center gap-4 bg-card border border-border rounded-lg p-4"
-              >
-                <span className="text-2xl">{feature.icon}</span>
-                <div>
-                  <h3 className="text-sm font-bold text-foreground">
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {feature.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
+          {/* Match Card Preview */}
+          <div className="w-full max-w-md">
+            <SampleMatchCard />
           </div>
         </div>
       </aside>

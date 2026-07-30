@@ -8,6 +8,7 @@ load_dotenv()
 
 from app.routers import match
 from app.routers import github_router
+from app.routers import hackathons
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,6 +20,7 @@ app = FastAPI(
 )
 
 app.include_router(match.router)
+app.include_router(hackathons.router, prefix="/api/v1")
 
 # CORS — Next.js frontend'den gelen isteklere izin ver
 app.add_middleware(
