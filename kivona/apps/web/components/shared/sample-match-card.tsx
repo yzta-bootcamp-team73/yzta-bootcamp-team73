@@ -16,14 +16,14 @@ import { motion } from "framer-motion";
 const DUMMY_PROFILES = [
   {
     full_name: "Zeynep Yılmaz",
-    avatar_url: "https://i.pravatar.cc/150?u=zeynep",
+    avatar_url: "https://i.pravatar.cc/150?u=selim",
     primary_role: "Frontend Geliştirici",
     top_skills: ["React", "Three.js", "Tailwind"],
     match_score: 98,
   },
   {
     full_name: "Caner Ekinci",
-    avatar_url: "https://i.pravatar.cc/150?u=caner",
+    avatar_url: "https://i.pravatar.cc/150?u=aykut",
     primary_role: "Veri Bilimci",
     top_skills: ["Python", "PyTorch", "SQL"],
     match_score: 95,
@@ -52,8 +52,8 @@ export function SampleMatchCard({ showMatchScore = true, count = 2 }: { showMatc
       const supabase = createClient();
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, avatar_url, github_metadata")
-        .not("github_metadata", "is", null)
+        .select("full_name, avatar_url, ai_analysis, role, skills")
+        .not("ai_analysis", "is", null)
         .limit(20);
         
       let fetchedProfiles: typeof DUMMY_PROFILES = [];
@@ -62,18 +62,22 @@ export function SampleMatchCard({ showMatchScore = true, count = 2 }: { showMatc
         const shuffled = data.sort(() => 0.5 - Math.random());
         fetchedProfiles = shuffled.slice(0, count).map(p => {
           let skills = ["React", "TypeScript", "Next.js"];
-          let role = "Yazılım Geliştirici";
+          let role = p.role || "Yazılım Geliştirici";
           let score = Math.floor(Math.random() * 10) + 90;
 
-          if (p.github_metadata && p.github_metadata.recommendation_metadata) {
-            const meta = p.github_metadata.recommendation_metadata;
-            if (meta.strongest_languages && meta.strongest_languages.length > 0) {
-              skills = meta.strongest_languages.slice(0, 3);
-            }
-            if (meta.preferred_roles && meta.preferred_roles.length > 0) {
-              role = meta.preferred_roles[0].role || role;
-            }
-            // activity_score can act as a realistic match score, capped or adjusted if needed, but let's just use it directly if it's high enough, else fallback
+          // Parse skills column which is an array of JSON strings
+          if (Array.isArray(p.skills) && p.skills.length > 0) {
+             try {
+                const parsedSkills = p.skills.map((s: string) => JSON.parse(s).name);
+                if (parsedSkills.length > 0) {
+                   skills = parsedSkills.slice(0, 3);
+                }
+             } catch(e) {}
+          }
+
+          if (p.ai_analysis && p.ai_analysis.recommendation_metadata) {
+            const meta = p.ai_analysis.recommendation_metadata;
+            // activity_score can act as a realistic match score
             if (meta.activity_score && meta.activity_score > 70) {
                score = Math.min(99, meta.activity_score + 10);
             }
