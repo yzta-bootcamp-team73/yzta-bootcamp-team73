@@ -8,6 +8,7 @@ export interface DemoProfile {
   skills: string[]
   lookingFor: string[]
   bio: string
+  matchScore?: number
 }
 
 export const roleLabels: Record<DemoRole, string> = {
@@ -114,19 +115,3 @@ export const demoProfiles: DemoProfile[] = [
   },
 ]
 
-/**
- * İki beceri listesi arasındaki basit Jaccard benzerliği (kesişim / birleşim).
- * Bu bir ML/AI modeli değildir — düz küme aritmetiğidir, roadmap'teki
- * "Katman 2: Cosine Similarity" adımının (ML servisi) yerini tutmaz.
- */
-export function computeCompatibility(mySkills: string[], theirSkills: string[]): number {
-  if (mySkills.length === 0 || theirSkills.length === 0) return 0
-
-  const mine = new Set(mySkills.map((s) => s.toLowerCase()))
-  const theirs = new Set(theirSkills.map((s) => s.toLowerCase()))
-
-  const intersection = [...mine].filter((skill) => theirs.has(skill)).length
-  const union = new Set([...mine, ...theirs]).size
-
-  return union === 0 ? 0 : Math.round((intersection / union) * 100)
-}

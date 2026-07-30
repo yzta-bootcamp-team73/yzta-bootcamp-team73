@@ -13,7 +13,7 @@ import {
   CardDescription,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { type DemoProfile, roleLabels, computeCompatibility } from "@/lib/data/profiles"
+import { type DemoProfile, roleLabels } from "@/lib/data/profiles"
 
 const roleTabs = [
   { value: "all", label: "Tümü" },
@@ -49,7 +49,7 @@ export function MatchBoard({
       <div>
         <h1 className="text-2xl font-bold text-foreground">Akıllı Eşleştirme</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Rolüne göre filtrele, GitHub dillerine göre hesaplanan basit uyum oranını gör.
+          Rolüne göre filtrele, yapay zeka (ML) destekli uyum oranını gör.
         </p>
         {mySkills.length === 0 && (
           <p className="mt-2 text-xs text-muted-foreground">
@@ -72,7 +72,7 @@ export function MatchBoard({
           {filtered.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((profile, i) => {
-                const compatibility = computeCompatibility(mySkills, profile.skills)
+                const compatibility = profile.matchScore || 0
                 return (
                   <motion.div
                     key={profile.id}
