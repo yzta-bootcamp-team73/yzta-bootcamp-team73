@@ -30,7 +30,15 @@ interface InviteTeam {
   name: string
 }
 
-function InviteSection({ profile, myTeams }: { profile: DemoProfile; myTeams: InviteTeam[] }) {
+function InviteSection({
+  profile,
+  myTeams,
+  currentUserId,
+}: {
+  profile: DemoProfile
+  myTeams: InviteTeam[]
+  currentUserId?: string
+}) {
   const [teamId, setTeamId] = useState(myTeams[0]?.id ?? "")
   const [message, setMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -69,6 +77,7 @@ function InviteSection({ profile, myTeams }: { profile: DemoProfile; myTeams: In
       user_id: profile.id,
       status: "pending",
       invite_message: message.trim() || null,
+      invited_by: currentUserId,
     })
 
     if (error) {
@@ -157,10 +166,12 @@ export function MatchBoard({
   mySkills,
   profiles,
   myTeams,
+  currentUserId,
 }: {
   mySkills: string[]
   profiles: DemoProfile[]
   myTeams: InviteTeam[]
+  currentUserId?: string
 }) {
   const [activeRole, setActiveRole] = useState<string>("all")
 
@@ -323,7 +334,11 @@ export function MatchBoard({
                         </div>
 
                         {/* Invite CTA Area */}
-                        <InviteSection profile={profile} myTeams={myTeams} />
+                        <InviteSection
+                          profile={profile}
+                          myTeams={myTeams}
+                          currentUserId={currentUserId}
+                        />
                       </DialogContent>
                     </Dialog>
                   </motion.div>

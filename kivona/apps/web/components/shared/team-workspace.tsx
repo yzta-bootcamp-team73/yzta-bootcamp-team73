@@ -288,7 +288,12 @@ export function TeamWorkspace({
 
     const { error: insertError } = await supabase
       .from("team_members")
-      .insert({ team_id: team.id, user_id: profile.id, status: "pending" })
+      .insert({
+        team_id: team.id,
+        user_id: profile.id,
+        status: "pending",
+        invited_by: currentUserId,
+      })
 
     if (insertError) {
       setInviteError(

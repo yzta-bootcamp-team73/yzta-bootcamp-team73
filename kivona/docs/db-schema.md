@@ -225,3 +225,13 @@ ALTER TABLE public.team_members ADD COLUMN IF NOT EXISTS invite_message TEXT;
 ```
 
 Ek bir policy gerekmiyor — mevcut "Team members can add others" (INSERT) ve "Team members are viewable by everyone" (SELECT) policy'leri bu yeni kolonu da kapsıyor.
+
+## Uygulanması gereken ek SQL (9. tur — davet edenin adı gösterilsin)
+
+Davet edilen kişi Kabul/Reddet ekranında kimin kendisini davet ettiğini görmüyordu — kim davet etti bilgisi hiç kaydedilmiyordu.
+
+```sql
+ALTER TABLE public.team_members ADD COLUMN IF NOT EXISTS invited_by UUID REFERENCES public.profiles(id);
+```
+
+Ek bir policy gerekmiyor, mevcut policy'ler bu kolonu da kapsıyor.

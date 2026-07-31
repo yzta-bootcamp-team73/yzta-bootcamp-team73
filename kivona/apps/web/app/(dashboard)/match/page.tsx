@@ -85,5 +85,12 @@ export default async function MatchPage() {
     .map((row) => (row as unknown as { teams: { id: string; name: string } | null }).teams)
     .filter((team): team is { id: string; name: string } => Boolean(team))
 
-  return <MatchBoard mySkills={mySkills} profiles={profilesWithScores} myTeams={inviteTeams} />
+  return (
+    <MatchBoard
+      mySkills={mySkills}
+      profiles={profilesWithScores}
+      myTeams={inviteTeams}
+      currentUserId={user?.id}
+    />
+  )
 }

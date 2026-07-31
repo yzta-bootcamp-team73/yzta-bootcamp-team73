@@ -18,10 +18,12 @@ export function PendingInvite({
   team,
   currentUserId,
   inviteMessage,
+  inviterName,
 }: {
   team: Team
   currentUserId: string
   inviteMessage?: string | null
+  inviterName?: string | null
 }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -56,7 +58,9 @@ export function PendingInvite({
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Bu takıma davet edildin. Katılmak ister misin?
+            {inviterName
+              ? `${inviterName} seni bu takıma davet etti. Katılmak ister misin?`
+              : "Bu takıma davet edildin. Katılmak ister misin?"}
           </p>
           {inviteMessage && (
             <div className="flex gap-2 rounded-lg border border-border bg-muted/40 p-3">

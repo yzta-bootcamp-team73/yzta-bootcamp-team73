@@ -25,7 +25,7 @@ export default async function TeamDetailPage({
 
   const { data: membership } = await supabase
     .from("team_members")
-    .select("status, invite_message")
+    .select("status, invite_message, invited_by")
     .eq("team_id", teamId)
     .eq("user_id", user.id)
     .maybeSingle()
@@ -45,11 +45,22 @@ export default async function TeamDetailPage({
   }
 
   if (membership.status === "pending") {
+    const inviter = membership.invited_by
+      ? (
+          await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", membership.invited_by)
+            .maybeSingle()
+        ).data
+      : null
+
     return (
       <PendingInvite
         team={team}
         currentUserId={user.id}
         inviteMessage={membership.invite_message}
+        inviterName={inviter?.full_name ?? null}
       />
     )
   }
