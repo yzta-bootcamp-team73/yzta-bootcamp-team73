@@ -27,7 +27,7 @@ import {
 const navLinks = [
   { href: "/discover", label: "Keşfet", icon: Compass },
   { href: "/match", label: "Eşleşme", icon: Users },
-  { href: "/team", label: "Takımım", icon: UsersRound },
+  { href: "/team", label: "Takımlarım", icon: UsersRound },
   { href: "/profile", label: "Profilim", icon: User },
 ]
 
@@ -60,7 +60,7 @@ function SidebarContent({ user }: { user: SupabaseUser | null }) {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
         {navLinks.map((link) => {
-          const isActive = pathname === link.href
+          const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`)
           const Icon = link.icon
           return (
             <Link

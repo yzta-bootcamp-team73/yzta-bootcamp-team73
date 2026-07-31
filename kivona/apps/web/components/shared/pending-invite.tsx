@@ -33,7 +33,7 @@ export function PendingInvite({ team, currentUserId }: { team: Team; currentUser
     setIsLoading(true)
     const supabase = createClient()
     await supabase.from("team_members").delete().eq("team_id", team.id).eq("user_id", currentUserId)
-    router.refresh()
+    router.push("/team")
   }
 
   return (

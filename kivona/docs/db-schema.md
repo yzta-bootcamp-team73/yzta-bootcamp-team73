@@ -203,3 +203,15 @@ WHERE status = 'accepted'
 GROUP BY user_id
 HAVING count(*) > 1;
 ```
+
+## Uygulanması gereken ek SQL (7. tur — kullanıcı artık birden fazla takımda olabilsin)
+
+Karar değişti: bir kullanıcı artık aynı anda birden fazla takıma üye olabilir (ör. eşleşme sayfasında gördüğün, zaten başka bir takımda olan birini kendi takımına da davet edebilmen için). "Kullanıcı başına 1 takım" kısıtı kaldırılıyor — zaten uygulanmamış olabilir ama var olsa da olmasa da bu SQL güvenli:
+
+```sql
+ALTER TABLE public.team_members DROP CONSTRAINT IF EXISTS team_members_user_id_unique;
+```
+
+Aynı takıma iki kez katılmayı engelleyen `UNIQUE(team_id, user_id)` kısıtı (orijinal şemadan) olduğu gibi kalıyor — birden fazla takımda olmak serbest, aynı takıma iki kez üye olmak hâlâ engelli.
+
+`/team` sayfası artık tek bir takım göstermek yerine, kullanıcının **üye olduğu tüm takımların listesini** gösteriyor; her birine tıklayınca `/team/[takımId]` üzerinden o takımın çalışma alanına gidiliyor.
