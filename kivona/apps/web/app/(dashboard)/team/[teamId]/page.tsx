@@ -65,11 +65,19 @@ export default async function TeamDetailPage({
     )
   }
 
-  const [{ data: memberRows }, { data: ideas }, { data: icebreakers }, { data: messages }] =
-    await Promise.all([
+  const [
+    { data: memberRows, error: memberError },
+    { data: ideas },
+    { data: icebreakers },
+    { data: messages },
+  ] = await Promise.all([
+      // team_members'ta profiles'a iki farkli foreign key var (user_id ve invited_by),
+      // bu yuzden hangi kolon uzerinden embed yapilacagini acikca belirtmek gerekiyor
+      // -- yoksa PostgREST "more than one relationship was found" hatasi verip
+      // sorguyu tamamen basarisiz kiliyor (uye listesi sessizce bos donuyor).
       supabase
         .from("team_members")
-        .select("user_id, status, profiles(id, full_name, avatar_url)")
+        .select("user_id, status, profiles!user_id(id, full_name, avatar_url)")
         .eq("team_id", teamId),
       supabase
         .from("ideas")
@@ -86,6 +94,10 @@ export default async function TeamDetailPage({
         .order("created_at", { ascending: true })
         .limit(100),
     ])
+
+  if (memberError) {
+    console.error("Takım üyeleri çekilemedi:", memberError)
+  }
 
   const members: TeamMemberProfile[] = (memberRows ?? [])
     .map((row): TeamMemberProfile | null => {
