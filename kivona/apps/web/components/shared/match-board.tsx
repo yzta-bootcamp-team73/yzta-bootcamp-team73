@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { Users, Sparkles, UserPlus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Card,
   CardContent,
@@ -22,6 +23,117 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { createClient } from "@/lib/supabase/client"
+
+interface InviteTeam {
+  id: string
+  name: string
+}
+
+function InviteSection({ profile, myTeams }: { profile: DemoProfile; myTeams: InviteTeam[] }) {
+  const [teamId, setTeamId] = useState(myTeams[0]?.id ?? "")
+  const [message, setMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(
+    null
+  )
+
+  if (profile.isDemo) {
+    return (
+      <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/40 p-4 text-center">
+        <p className="text-xs text-muted-foreground">
+          Bu demo bir profil, gerçek bir hesaba bağlı değil — davet gönderilemez.
+        </p>
+      </div>
+    )
+  }
+
+  if (myTeams.length === 0) {
+    return (
+      <div className="mt-4 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          Davet gönderebilmek için önce üye olduğun bir takım olması lazım.
+        </p>
+      </div>
+    )
+  }
+
+  async function handleInvite() {
+    if (!teamId) return
+    setIsLoading(true)
+    setFeedback(null)
+    const supabase = createClient()
+
+    const { error } = await supabase.from("team_members").insert({
+      team_id: teamId,
+      user_id: profile.id,
+      status: "pending",
+      invite_message: message.trim() || null,
+    })
+
+    if (error) {
+      setFeedback({
+        type: "error",
+        text:
+          error.code === "23505"
+            ? "Bu kişiye bu takımdan zaten davet gönderilmiş."
+            : `Gönderilemedi: ${error.message}`,
+      })
+      setIsLoading(false)
+      return
+    }
+
+    setFeedback({ type: "success", text: "Davet gönderildi!" })
+    setIsLoading(false)
+  }
+
+  return (
+    <div className="mt-4 space-y-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4">
+      <div className="flex items-center gap-2">
+        <div className="rounded-full bg-primary/10 p-2">
+          <UserPlus className="size-4 text-primary" />
+        </div>
+        <h4 className="text-sm font-semibold text-foreground">Takıma Davet Et</h4>
+      </div>
+
+      {myTeams.length > 1 && (
+        <select
+          value={teamId}
+          onChange={(e) => setTeamId(e.target.value)}
+          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+        >
+          {myTeams.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.name}
+            </option>
+          ))}
+        </select>
+      )}
+
+      <Input
+        placeholder="Davetle birlikte kısa bir mesaj yaz (opsiyonel)"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+      />
+
+      <Button className="w-full" onClick={handleInvite} disabled={isLoading || !teamId}>
+        {isLoading ? "Gönderiliyor..." : "Davet Gönder"}
+      </Button>
+
+      {feedback && (
+        <p
+          className={`text-xs ${
+            feedback.type === "error"
+              ? "text-destructive"
+              : "text-emerald-600 dark:text-emerald-400"
+          }`}
+        >
+          {feedback.text}
+        </p>
+      )}
+    </div>
+  )
+}
 
 const roleTabs = [
   { value: "all", label: "Tümü" },
@@ -44,9 +156,11 @@ function initialsOf(fullName: string) {
 export function MatchBoard({
   mySkills,
   profiles,
+  myTeams,
 }: {
   mySkills: string[]
   profiles: DemoProfile[]
+  myTeams: InviteTeam[]
 }) {
   const [activeRole, setActiveRole] = useState<string>("all")
 
@@ -209,20 +323,7 @@ export function MatchBoard({
                         </div>
 
                         {/* Invite CTA Area */}
-                        <div className="mt-4 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 flex flex-col items-center text-center gap-3">
-                          <div className="rounded-full bg-primary/10 p-2">
-                            <UserPlus className="size-5 text-primary" />
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-semibold text-foreground">Takıma Davet Et</h4>
-                            <p className="text-xs text-muted-foreground mt-1 max-w-[250px]">
-                              Bu özellik çok yakında aktif olacak. Şimdilik mükemmel eşleşmelerinizi inceleyebilirsiniz.
-                            </p>
-                          </div>
-                          <Button variant="default" className="w-full mt-1 opacity-50 cursor-not-allowed">
-                            Yakında
-                          </Button>
-                        </div>
+                        <InviteSection profile={profile} myTeams={myTeams} />
                       </DialogContent>
                     </Dialog>
                   </motion.div>

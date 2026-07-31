@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Users, Check, X } from "lucide-react"
+import { Users, Check, X, MessageSquareQuote } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +14,15 @@ import {
 } from "@/components/ui/card"
 import type { Team } from "@/types/team"
 
-export function PendingInvite({ team, currentUserId }: { team: Team; currentUserId: string }) {
+export function PendingInvite({
+  team,
+  currentUserId,
+  inviteMessage,
+}: {
+  team: Team
+  currentUserId: string
+  inviteMessage?: string | null
+}) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -50,6 +58,12 @@ export function PendingInvite({ team, currentUserId }: { team: Team; currentUser
           <p className="text-sm text-muted-foreground">
             Bu takıma davet edildin. Katılmak ister misin?
           </p>
+          {inviteMessage && (
+            <div className="flex gap-2 rounded-lg border border-border bg-muted/40 p-3">
+              <MessageSquareQuote className="size-4 shrink-0 text-primary" />
+              <p className="text-sm text-foreground italic">&quot;{inviteMessage}&quot;</p>
+            </div>
+          )}
           <div className="flex gap-2">
             <Button
               variant="outline"

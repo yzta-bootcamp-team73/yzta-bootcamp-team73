@@ -14,6 +14,8 @@ type CompetitionRow = {
   image_url: string
 }
 
+type HackathonApiItem = CompetitionRow
+
 function mapRow(row: CompetitionRow): Competition {
   return {
     id: row.id,
@@ -40,9 +42,9 @@ export default async function DiscoverPage() {
     if (res.ok) {
       const result = await res.json()
       if (result.status === "success" && result.data.length > 0) {
-        competitions = result.data.map((item: any) => ({
+        competitions = result.data.map((item: HackathonApiItem) => ({
           ...item,
-          imageUrl: item.image_url // map snake_case to camelCase
+          imageUrl: item.image_url, // map snake_case to camelCase
         }))
       }
     }

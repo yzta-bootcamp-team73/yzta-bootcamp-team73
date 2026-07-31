@@ -215,3 +215,13 @@ ALTER TABLE public.team_members DROP CONSTRAINT IF EXISTS team_members_user_id_u
 Aynı takıma iki kez katılmayı engelleyen `UNIQUE(team_id, user_id)` kısıtı (orijinal şemadan) olduğu gibi kalıyor — birden fazla takımda olmak serbest, aynı takıma iki kez üye olmak hâlâ engelli.
 
 `/team` sayfası artık tek bir takım göstermek yerine, kullanıcının **üye olduğu tüm takımların listesini** gösteriyor; her birine tıklayınca `/team/[takımId]` üzerinden o takımın çalışma alanına gidiliyor.
+
+## Uygulanması gereken ek SQL (8. tur — eşleşme sayfasından davet + davet mesajı)
+
+`/match` sayfasındaki "Takıma Davet Et" artık aktif ve davetle birlikte kısa bir mesaj gönderilebiliyor; davet edilen kişi bu mesajı Kabul/Reddet ekranında görüyor.
+
+```sql
+ALTER TABLE public.team_members ADD COLUMN IF NOT EXISTS invite_message TEXT;
+```
+
+Ek bir policy gerekmiyor — mevcut "Team members can add others" (INSERT) ve "Team members are viewable by everyone" (SELECT) policy'leri bu yeni kolonu da kapsıyor.

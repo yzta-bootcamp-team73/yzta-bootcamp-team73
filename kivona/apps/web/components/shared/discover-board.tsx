@@ -161,9 +161,9 @@ export function DiscoverBoard({ competitions }: { competitions: Competition[] })
               Daha Fazla Etkinlik ve Yarışma Nerede?
             </h3>
             <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-              Şu an platformumuzda gördüğünüz etkinlikler, Kivona'nın akıllı eşleşme konseptini sergilemek amacıyla listelenmektedir.
-              Vizyonumuz; gelecekte teknoloji odaklı kariyer platformları ve organizatörlerle resmi B2B (kurumsal) anlaşmalar yaparak, 
-              Türkiye'deki ve dünyadaki tüm proje çağrılarını ve teknoloji yarışmalarını tek bir merkezde toplamaktır.
+              Şu an platformumuzda gördüğünüz etkinlikler, Kivona&apos;nın akıllı eşleşme konseptini sergilemek amacıyla listelenmektedir.
+              Vizyonumuz; gelecekte teknoloji odaklı kariyer platformları ve organizatörlerle resmi B2B (kurumsal) anlaşmalar yaparak,
+              Türkiye&apos;deki ve dünyadaki tüm proje çağrılarını ve teknoloji yarışmalarını tek bir merkezde toplamaktır.
               Biz bu entegrasyonları tamamlayana kadar, güncel fırsatlara aşağıdaki platformlardan göz atabilirsiniz:
             </p>
             <div className="mt-5 flex flex-wrap gap-3">

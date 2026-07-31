@@ -80,8 +80,8 @@ export function GitHubAnalysisTrigger({
       setTimeout(() => {
         window.location.reload()
       }, 1500)
-    } catch (err: any) {
-      setErrorMessage(err.message || "Bilinmeyen bir hata oluştu")
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu")
       setStatus("error")
     }
   }

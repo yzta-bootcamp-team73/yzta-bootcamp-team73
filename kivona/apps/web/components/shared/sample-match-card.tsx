@@ -62,7 +62,7 @@ export function SampleMatchCard({ showMatchScore = true, count = 2 }: { showMatc
         const shuffled = data.sort(() => 0.5 - Math.random());
         fetchedProfiles = shuffled.slice(0, count).map(p => {
           let skills = ["React", "TypeScript", "Next.js"];
-          let role = p.role || "Yazılım Geliştirici";
+          const role = p.role || "Yazılım Geliştirici";
           let score = Math.floor(Math.random() * 10) + 90;
 
           // Parse skills column which is an array of JSON strings
@@ -72,7 +72,7 @@ export function SampleMatchCard({ showMatchScore = true, count = 2 }: { showMatc
                 if (parsedSkills.length > 0) {
                    skills = parsedSkills.slice(0, 3);
                 }
-             } catch(e) {}
+             } catch {}
           }
 
           if (p.ai_analysis && p.ai_analysis.recommendation_metadata) {

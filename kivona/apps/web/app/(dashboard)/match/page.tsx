@@ -36,7 +36,9 @@ export default async function MatchPage() {
       // Extract skills
       let skills: string[] = []
       if (Array.isArray(analysis.skills)) {
-        skills = analysis.skills.map((s: any) => typeof s === "string" ? s : s.name).filter(Boolean)
+        skills = analysis.skills
+          .map((s: unknown) => (typeof s === "string" ? s : (s as { name?: string })?.name))
+          .filter((s: string | undefined): s is string => Boolean(s))
       }
 
       return {
@@ -51,8 +53,11 @@ export default async function MatchPage() {
       }
     })
 
-  // Combine Real and Fake profiles
-  const allProfiles = [...dbProfiles, ...demoProfiles]
+  // Combine Real and Fake profiles — demo olanlar isDemo ile isaretleniyor (davet edilemezler)
+  const allProfiles = [
+    ...dbProfiles.map((p) => ({ ...p, isDemo: false })),
+    ...demoProfiles.map((p) => ({ ...p, isDemo: true })),
+  ]
 
   // Fetch ML match scores for all profiles
   const profilesWithScores = await Promise.all(
@@ -65,5 +70,20 @@ export default async function MatchPage() {
   // Sort by matchScore descending
   profilesWithScores.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0))
 
-  return <MatchBoard mySkills={mySkills} profiles={profilesWithScores} />
+  // Davet gönderirken seçilebilecek takımlar — sadece kabul edilmiş (accepted) üyelikler
+  const myTeams = user
+    ? (
+        await supabase
+          .from("team_members")
+          .select("team_id, teams(id, name)")
+          .eq("user_id", user.id)
+          .eq("status", "accepted")
+      ).data ?? []
+    : []
+
+  const inviteTeams = myTeams
+    .map((row) => (row as unknown as { teams: { id: string; name: string } | null }).teams)
+    .filter((team): team is { id: string; name: string } => Boolean(team))
+
+  return <MatchBoard mySkills={mySkills} profiles={profilesWithScores} myTeams={inviteTeams} />
 }

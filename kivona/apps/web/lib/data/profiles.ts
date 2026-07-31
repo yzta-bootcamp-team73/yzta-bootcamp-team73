@@ -10,6 +10,8 @@ export interface DemoProfile {
   bio: string
   matchScore?: number
   avatarUrl?: string
+  /** true ise bu bir demo/sahte profildir, gerçek bir hesaba karşılık gelmez — davet edilemez. */
+  isDemo?: boolean
 }
 
 export const roleLabels: Record<DemoRole, string> = {

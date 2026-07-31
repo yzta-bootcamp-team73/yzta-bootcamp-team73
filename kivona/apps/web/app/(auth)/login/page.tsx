@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Github } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";

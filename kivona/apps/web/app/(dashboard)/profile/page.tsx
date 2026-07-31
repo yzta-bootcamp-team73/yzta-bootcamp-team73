@@ -17,6 +17,22 @@ import { GitHubAnalysisTrigger } from "@/components/shared/github-analysis-trigg
 import { EditProfileDialog } from "@/components/shared/edit-profile-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
+interface AnalysisSkill {
+  name: string
+  confidence?: number
+  reasons?: string[]
+}
+
+interface AnalysisRepo {
+  name: string
+  url: string
+  description?: string
+  stars?: number
+  forks?: number
+  language?: string
+  topics?: string[]
+}
+
 export default async function ProfilePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -55,7 +71,9 @@ export default async function ProfilePage() {
   const repositories = isAiAnalysis ? (analysis.repositories ?? []) : [];
 
   // Manuel profil düzenleme için mevcut verileri hazırla
-  const manualSkillNames = skills.map((s: any) => typeof s === 'string' ? s : s.name).filter(Boolean);
+  const manualSkillNames: string[] = skills
+    .map((s: unknown) => (typeof s === "string" ? s : (s as { name?: string })?.name))
+    .filter((s: string | undefined): s is string => Boolean(s));
   const manualSpecNames = specializations as string[];
 
   const getConfidenceColor = (score: number) => {
@@ -128,7 +146,7 @@ export default async function ProfilePage() {
                 isAiAnalysis ? (
                   <TooltipProvider delay={200}>
                     <div className="flex flex-wrap gap-2">
-                      {skills.map((skill: any) => (
+                      {skills.map((skill: AnalysisSkill) => (
                         <Tooltip key={skill.name}>
                           <TooltipTrigger className="cursor-help">
                             <Badge 
@@ -148,7 +166,7 @@ export default async function ProfilePage() {
                               <Sparkles className="size-3.5 text-primary" />
                               AI Karar Detayı
                             </div>
-                            {skill.reasons?.length > 0 ? (
+                            {skill.reasons && skill.reasons.length > 0 ? (
                               <ul className="space-y-1.5">
                                 {skill.reasons.map((reason: string, idx: number) => (
                                   <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5 leading-snug">
@@ -167,11 +185,14 @@ export default async function ProfilePage() {
                   </TooltipProvider>
                 ) : (
                   <div className="flex flex-wrap gap-2">
-                    {skills.map((skill: any) => (
-                      <Badge key={skill.name || skill} variant="outline" className="px-2.5 py-1">
-                        {skill.name || skill}
-                      </Badge>
-                    ))}
+                    {skills.map((skill: string | AnalysisSkill) => {
+                      const label = typeof skill === "string" ? skill : skill.name
+                      return (
+                        <Badge key={label} variant="outline" className="px-2.5 py-1">
+                          {label}
+                        </Badge>
+                      )
+                    })}
                   </div>
                 )
               ) : (
@@ -266,7 +287,7 @@ export default async function ProfilePage() {
             <CardContent>
               {repositories.length > 0 ? (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-                  {repositories.map((repo: any) => (
+                  {repositories.map((repo: AnalysisRepo) => (
                     <div
                       key={repo.name}
                       className="rounded-lg border border-border p-3 space-y-2 transition-colors hover:bg-muted/50"
@@ -282,13 +303,13 @@ export default async function ProfilePage() {
                           <ExternalLink className="size-3" />
                         </a>
                         <div className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
-                          {repo.stars > 0 && (
+                          {Boolean(repo.stars) && (
                             <span className="flex items-center gap-0.5">
                               <Star className="size-3" />
                               {repo.stars}
                             </span>
                           )}
-                          {repo.forks > 0 && (
+                          {Boolean(repo.forks) && (
                             <span className="flex items-center gap-0.5">
                               <GitFork className="size-3" />
                               {repo.forks}
