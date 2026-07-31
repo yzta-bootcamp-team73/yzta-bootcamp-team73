@@ -249,7 +249,7 @@ export function TeamWorkspace({
     setIsLeaving(true)
     const supabase = createClient()
     await supabase.from("team_members").delete().eq("team_id", team.id).eq("user_id", currentUserId)
-    router.refresh()
+    router.push("/team")
   }
 
   async function handleRemoveMember(memberId: string) {
@@ -293,7 +293,7 @@ export function TeamWorkspace({
     if (insertError) {
       setInviteError(
         insertError.code === "23505"
-          ? "Bu kişi zaten bir takımda ya da bekleyen bir daveti var."
+          ? "Bu kişiye zaten davet gönderilmiş."
           : `Eklenemedi: ${insertError.message}`
       )
       setInviteLoading(false)

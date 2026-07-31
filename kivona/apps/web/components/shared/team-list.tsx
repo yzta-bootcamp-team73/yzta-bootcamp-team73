@@ -2,10 +2,12 @@
 
 import { useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
-import { Users, Plus } from "lucide-react"
+import Link from "next/link"
+import { Users, Plus, ArrowRight } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardHeader,
@@ -21,13 +23,19 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import type { JoinableTeam } from "@/types/team"
+import type { JoinableTeam, MembershipStatus } from "@/types/team"
 
-export function CreateOrJoinTeam({
+export interface MyTeam extends JoinableTeam {
+  status: MembershipStatus
+}
+
+export function TeamList({
   userId,
+  myTeams,
   openTeams,
 }: {
   userId: string
+  myTeams: MyTeam[]
   openTeams: JoinableTeam[]
 }) {
   const router = useRouter()
@@ -67,7 +75,7 @@ export function CreateOrJoinTeam({
     }
 
     setOpen(false)
-    router.refresh()
+    router.push(`/team/${team.id}`)
   }
 
   async function handleJoin(teamId: string) {
@@ -83,16 +91,17 @@ export function CreateOrJoinTeam({
       setIsLoading(false)
       return
     }
-    router.refresh()
+    router.push(`/team/${teamId}`)
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Takım Çalışma Alanı</h1>
+          <h1 className="text-2xl font-bold text-foreground">Takımlarım</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Henüz bir takımın yok. Yeni bir takım kur ya da mevcut bir takıma katıl.
+            Üye olduğun takımları gör, yeni bir takım kur ya da açık bir takıma katıl. Artık
+            birden fazla takımda birden olabilirsin.
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -129,36 +138,72 @@ export function CreateOrJoinTeam({
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {openTeams.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {openTeams.map((team) => (
-            <Card key={team.id}>
-              <CardHeader>
-                <CardTitle>{team.name}</CardTitle>
-                {team.description && <CardDescription>{team.description}</CardDescription>}
-              </CardHeader>
-              <CardFooter>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  disabled={isLoading}
-                  onClick={() => handleJoin(team.id)}
-                >
-                  Takıma Katıl
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <Users className="size-8 text-muted-foreground/50" />
-          <p className="text-muted-foreground">
-            Henüz katılabileceğin bir takım yok. İlk takımı sen kur!
-          </p>
+      {myTeams.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">Üye Olduğun Takımlar</h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {myTeams.map((team) => (
+              <Card key={team.id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between gap-2">
+                    <span className="truncate">{team.name}</span>
+                    {team.status === "pending" && (
+                      <Badge variant="outline" className="shrink-0 text-xs">
+                        Davet Bekliyor
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  {team.description && <CardDescription>{team.description}</CardDescription>}
+                </CardHeader>
+                <CardFooter>
+                  <Button
+                    variant={team.status === "pending" ? "default" : "outline"}
+                    size="sm"
+                    className="w-full gap-1.5"
+                    nativeButton={false}
+                    render={<Link href={`/team/${team.id}`} />}
+                  >
+                    {team.status === "pending" ? "Daveti Görüntüle" : "Çalışma Alanına Git"}
+                    <ArrowRight className="size-3.5" />
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
+
+      <div className="space-y-3">
+        <h2 className="text-sm font-semibold text-foreground">Katılabileceğin Takımlar</h2>
+        {openTeams.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {openTeams.map((team) => (
+              <Card key={team.id}>
+                <CardHeader>
+                  <CardTitle>{team.name}</CardTitle>
+                  {team.description && <CardDescription>{team.description}</CardDescription>}
+                </CardHeader>
+                <CardFooter>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={isLoading}
+                    onClick={() => handleJoin(team.id)}
+                  >
+                    Takıma Katıl
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
+            <Users className="size-8 text-muted-foreground/50" />
+            <p className="text-muted-foreground">Katılabileceğin başka bir takım yok.</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
