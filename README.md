@@ -177,4 +177,9 @@ Bu sprintte projenin Yapay Zeka (AI) destekli; analiz, eşleştirme motoru ve ge
 
 - Önemli Not: Render'ın ücretsiz versiyonunda sunucu 15 dakika kullanılmazsa uyku moduna geçer (tasarruf için). Bu yüzden siteye girince tekrar uyanması yaklaşık 50 saniye süreceğinden ona göre test etmenizi belirtmek isteriz.
 
+
+- **Site Linki**: https://kivona.vercel.app
+
+- **Tanıtım Videosu**: https://youtu.be/QRrBi3UlaLY
+
 ---
