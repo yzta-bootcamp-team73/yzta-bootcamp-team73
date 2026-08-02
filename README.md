@@ -121,47 +121,47 @@ Bu sprintte uygulamanın altyapısı ve kodlama fazı büyük ölçüde tamamlan
 
 - **Sprint board update**: Sprint board ekran görüntüleri:
 
-![Backlog 1](/ProjectManagement/Sprint3/SprintBoard/sprint_3.1.png)
-![Backlog 2](/ProjectManagement/Sprint3/SprintBoard/sprint_3.2.png)
-![Backlog 3](/ProjectManagement/Sprint3/SprintBoard/sprint_3.3.png)
+![Backlog 1](/ProjectManagement/Sprint3/sprint_3.1.png)
+![Backlog 2](/ProjectManagement/Sprint3/sprint_3.2.png)
+![Backlog 3](/ProjectManagement/Sprint3/sprint_3.3.png)
 
 - **Ürün Durumu**:
 
 Bu sprintte projenin Yapay Zeka (AI) destekli; analiz, eşleştirme motoru ve gelişmiş takım yönetim sistemleri başarıyla tamamlanmıştır:
 
-![Ürün Ekran Görüntüsü 1](/ProjectManagement/Sprint3/Resim9.png) <br>
+![Ürün Ekran Görüntüsü 1](/ProjectManagement/Sprint3/resim9.png) <br>
 
 - **Ana Sayfa Ekranı**: Platformun işleyişini anlatan ve eşleştirme mantığını kullanıcılara henüz giriş yapmadan gösteren önizleme kartlarıyla zenginleştirilmiş, animasyonlu ve karanlık tema destekli ana sayfa ekranı.
 
-![Ürün Ekran Görüntüsü 2](/ProjectManagement/Sprint3/Resim7.png) <br>
+![Ürün Ekran Görüntüsü 2](/ProjectManagement/Sprint3/resim7.png) <br>
 
 - **GitHub Destekli Profil ve Yetkinlik Analizi**: Kullanıcının GitHub profilindeki repolarının yapay zeka ile analiz edilerek kişisel becerilerin, rol anahtar kelimelerinin ve teknik raporların listelendiği detaylı profil görünümü.
 
-![Ürün Ekran Görüntüsü 3](/ProjectManagement/Sprint3/Resim1.png) <br>
+![Ürün Ekran Görüntüsü 3](/ProjectManagement/Sprint3/resim1.png) <br>
 
 - **Keşfet Panosu**: Supabase veritabanından anlık olarak çekilen gerçek kullanıcı profillerinin ve güncel yarışma fırsatlarının listelendiği Keşfet sayfası.
 
-![Ürün Ekran Görüntüsü 4](/ProjectManagement/Sprint3/Resim2.png) <br>
+![Ürün Ekran Görüntüsü 4](/ProjectManagement/Sprint3/resim2.png) <br>
 
 - **Yapay Zeka Destekli Akıllı Eşleştirme Motoru (AI Match Engine)**: Hugging Face Serverless API mimarisi üzerinde çalışan ve kullanıcıların GitHub yetkinlikleri ile takımın ihtiyaçları arasındaki Cosine Similarity (Vektör Benzerliği) oranını hesaplayarak 'Uyum Skoru' üreten akıllı eşleştirme arayüzü.
 
-![Ürün Ekran Görüntüsü 5](/ProjectManagement/Sprint3/Resim8.png) <br>
+![Ürün Ekran Görüntüsü 5](/ProjectManagement/Sprint3/resim8.png) <br>
 
 - **AI Eşleşme ve Davet Ekranı**: Yapay Zeka tabanlı 'Akıllı Eşleştirme' sistemi. Kullanıcıların detaylı yetkinliklerinin (teknoloji yığınlarının), takım ihtiyaçlarına göre hesaplanmış '% Uyum Skorunun' görüntülendiği ve özel bir mesajla doğrudan takıma davet edilebildikleri tıklanabilen profil kartı arayüzü.
 
-![Ürün Ekran Görüntüsü 6](/ProjectManagement/Sprint3/Resim3.png) <br>
+![Ürün Ekran Görüntüsü 6](/ProjectManagement/Sprint3/resim3.png) <br>
 
 - **Gelişmiş Takım Yönetim Panosu**: Kullanıcıların birden fazla takıma üye olabildiği; takımları ve davetleri görüntüleyebildiği ve liderlerin takım üyelerini yönetebildiği (çıkarma/ayrılma) modüler takım yönetim arayüzü.
 
-![Ürün Ekran Görüntüsü 7](/ProjectManagement/Sprint3/Resim4.png) <br>
+![Ürün Ekran Görüntüsü 7](/ProjectManagement/Sprint3/resim4.png) <br>
 
 - **Gerçek Zamanlı (Real-Time) Mesajlaşma ve Dosya Paylaşımı**: Takım üyelerinin iletişim kaosunu bitirmek için geliştirilmiş; anlık mesajlaşma, dosya paylaşımı ve okunmamış mesaj bildirim rozetleri içeren ortak haberleşme kanalı.
 
-![Ürün Ekran Görüntüsü 8](/ProjectManagement/Sprint3/Resim5.png) <br>
+![Ürün Ekran Görüntüsü 8](/ProjectManagement/Sprint3/resim5.png) <br>
 
 - **Buz Kırıcı ve Takım Yönetim Ekranı**: Takım içi kaynaşmayı hızlandıran 'Buz Kırıcı (Ice-Breaker)' panosu.
 
-![Ürün Ekran Görüntüsü 9](/ProjectManagement/Sprint3/Resim6.png)
+![Ürün Ekran Görüntüsü 9](/ProjectManagement/Sprint3/resim6.png)
 
 - **Sürükle-Bırak Destekli (Drag-and-Drop) Kanban Görev Panosu**: Takım içi görev dağılımının ve beyin fırtınalarının (fikir havuzu) asenkron olarak yürütülebildiği; oy verme, işlemi geri alma, ekleme ve silme özelliklerine sahip interaktif Kanban panosu.
 
