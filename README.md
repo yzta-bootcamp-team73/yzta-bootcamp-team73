@@ -117,4 +117,64 @@ Bu sprintte uygulamanın altyapısı ve kodlama fazı büyük ölçüde tamamlan
 
 # Sprint 3
 
+- **Daily Scrum**: Bu sprintte de Daily Scrum toplantıları takım üyelerinin programlarındaki farklılıklar sebebiyle Slack ve WhatsApp üzerinden asenkron olarak gerçekleştirilmeye devam etmiştir. Daily Scrum toplantısı örneği belge olarak projeye eklenmiştir: [Sprint 3 Daily Scrum Chats](/ProjectManagement/yzta-bootcamp-73.takim.docx)
+
+- **Sprint board update**: Sprint board ekran görüntüleri:
+
+![Backlog 1](/ProjectManagement/Sprint3/SprintBoard/sprint_3.1.png)
+![Backlog 2](/ProjectManagement/Sprint3/SprintBoard/sprint_3.2.png)
+![Backlog 3](/ProjectManagement/Sprint3/SprintBoard/sprint_3.3.png)
+
+- **Ürün Durumu**:
+
+Bu sprintte projenin Yapay Zeka (AI) destekli; analiz, eşleştirme motoru ve gelişmiş takım yönetim sistemleri başarıyla tamamlanmıştır:
+
+![Ürün Ekran Görüntüsü 1](/ProjectManagement/Sprint3/Resim9.png) <br>
+
+- **Ana Sayfa Ekranı**: Platformun işleyişini anlatan ve eşleştirme mantığını kullanıcılara henüz giriş yapmadan gösteren önizleme kartlarıyla zenginleştirilmiş, animasyonlu ve karanlık tema destekli ana sayfa ekranı.
+
+![Ürün Ekran Görüntüsü 2](/ProjectManagement/Sprint3/Resim7.png) <br>
+
+- **GitHub Destekli Profil ve Yetkinlik Analizi**: Kullanıcının GitHub profilindeki repolarının yapay zeka ile analiz edilerek kişisel becerilerin, rol anahtar kelimelerinin ve teknik raporların listelendiği detaylı profil görünümü.
+
+![Ürün Ekran Görüntüsü 3](/ProjectManagement/Sprint3/Resim1.png) <br>
+
+- **Keşfet Panosu**: Supabase veritabanından anlık olarak çekilen gerçek kullanıcı profillerinin ve güncel yarışma fırsatlarının listelendiği Keşfet sayfası.
+
+![Ürün Ekran Görüntüsü 4](/ProjectManagement/Sprint3/Resim2.png) <br>
+
+- **Yapay Zeka Destekli Akıllı Eşleştirme Motoru (AI Match Engine)**: Hugging Face Serverless API mimarisi üzerinde çalışan ve kullanıcıların GitHub yetkinlikleri ile takımın ihtiyaçları arasındaki Cosine Similarity (Vektör Benzerliği) oranını hesaplayarak 'Uyum Skoru' üreten akıllı eşleştirme arayüzü.
+
+![Ürün Ekran Görüntüsü 5](/ProjectManagement/Sprint3/Resim8.png) <br>
+
+- **AI Eşleşme ve Davet Ekranı**: Yapay Zeka tabanlı 'Akıllı Eşleştirme' sistemi. Kullanıcıların detaylı yetkinliklerinin (teknoloji yığınlarının), takım ihtiyaçlarına göre hesaplanmış '% Uyum Skorunun' görüntülendiği ve özel bir mesajla doğrudan takıma davet edilebildikleri tıklanabilen profil kartı arayüzü.
+
+![Ürün Ekran Görüntüsü 6](/ProjectManagement/Sprint3/Resim3.png) <br>
+
+- **Gelişmiş Takım Yönetim Panosu**: Kullanıcıların birden fazla takıma üye olabildiği; takımları ve davetleri görüntüleyebildiği ve liderlerin takım üyelerini yönetebildiği (çıkarma/ayrılma) modüler takım yönetim arayüzü.
+
+![Ürün Ekran Görüntüsü 7](/ProjectManagement/Sprint3/Resim4.png) <br>
+
+- **Gerçek Zamanlı (Real-Time) Mesajlaşma ve Dosya Paylaşımı**: Takım üyelerinin iletişim kaosunu bitirmek için geliştirilmiş; anlık mesajlaşma, dosya paylaşımı ve okunmamış mesaj bildirim rozetleri içeren ortak haberleşme kanalı.
+
+![Ürün Ekran Görüntüsü 8](/ProjectManagement/Sprint3/Resim5.png) <br>
+
+- **Buz Kırıcı ve Takım Yönetim Ekranı**: Takım içi kaynaşmayı hızlandıran 'Buz Kırıcı (Ice-Breaker)' panosu.
+
+![Ürün Ekran Görüntüsü 9](/ProjectManagement/Sprint3/Resim6.png)
+
+- **Sürükle-Bırak Destekli (Drag-and-Drop) Kanban Görev Panosu**: Takım içi görev dağılımının ve beyin fırtınalarının (fikir havuzu) asenkron olarak yürütülebildiği; oy verme, işlemi geri alma, ekleme ve silme özelliklerine sahip interaktif Kanban panosu.
+
+- **Sprint Review**:
+  Alınan kararlar: Projenin son sprinti olması sebebiyle MVP (Minimum Viable Product) hedeflerine ulaşılıp ulaşılmadığı değerlendirilmiş ve Backlog'da yer alan planlanmış tüm özelliklerin "Done" aşamasına getirildiği görülmüştür. Makine öğrenmesi modeli Vercel sınırlarına takıldığı için Render platformuna taşınmış; kullanıcıların GitHub yetkinlik metinleri ile takım ihtiyaçları arasında Cosine Similarity (Vektör Benzerliği) hesaplayan AI tabanlı eşleştirme motoru geliştirilmiştir. AI (Yapay Zeka) modelinin dağıtımı aşamasında Render platformunda yaşanan RAM ve DNS sınırları, takımın çevik karar almasıyla modelin dışarıya (Hugging Face) Serverless API olarak taşınmasıyla çözülmüş ve uygulamanın performansı büyük ölçüde artırılmıştır. Gerçek zamanlı mesajlaşma, dosya paylaşımı, GitHub kullanıcı adıyla takıma davet gönderme, takım lideri yetkileri/rozetleri, birden fazla takıma üye olabilme ve sürükle-bırak (Kanban) özellikleri sisteme başarıyla entegre edilmiştir. Geliştirilen gerçek zamanlı sohbet ve Kanban panosu özellikleri platformu statik bir yapıdan dinamik bir çalışma alanına dönüştürmüştür. Tasarım ve altyapı birleşimi takım üyelerinden tam not almıştır. Sprint Review katılımcıları: Adem Yıldız, Rabia Başak, Ceylan Ulusoy, Elif Fırıncı, Burak Koçaş
+
+- **Sprint Retrospective:**
+  - AI modelinin sunucu kısıtlamalarına (Render RAM ve DNS blokajları) takılması geliştirme sürecinde beklenmedik bir engel çıkarsa da, ekibin araştırmaları sonucu yapının dışarıya taşınması çok daha ölçeklenebilir ve profesyonel bir mimari elde edilmesini sağladı.
+  - Ana sayfa ve giriş ekranlarına önizleme amaçlı `SampleMatchCard` eklendi. Karanlık/aydınlık tema desteği, sayfa geçiş/giriş animasyonları ve okunmamış mesaj bildirim rozetleri gibi detaylarla ürünün profesyonel hissiyatı artırıldı.
+  - Yapay Zeka Destekli Eşleşme Motoru'nun entegrasyonu esnasında karşılaşılan zorluklar ekip içi aktif iletişim ve eş zamanlı testlerle hızlıca aşıldı.
+  - Platformumuzda yarışmaları anlık olarak çekebilmek için dışarıdan veri çekecek altyapı (Endpoint) kuruldu. Ancak hedef platformların ticari bot korumaları ve resmi birer API sunmamaları nedeniyle, sistemin mimarisinin sergilenmesi adına kendi API'ı üzerinden gerçeğe uygun (Simüle) veriler sunuldu. Yasal ve etik sınırlar içerisinde kalarak platformlarla anlaşma olduğunda web scraping'in yapılması karar alındı.
+  - Takım içi görev dağılımı bu sprintte maksimum verimle çalışmış; herkes kendi uzmanlık alanındaki Task'ları (AI, Frontend, Real-time Database) başarıyla tamamlayarak kodları büyük çatışmalar yaşamadan `main` branch'inde birleştirmeyi başarmıştır. Proje, hedeflediği vizyonu karşılayarak başarıyla sonuçlandırılmıştır.
+
+- Önemli Not: Render'ın ücretsiz versiyonunda sunucu 15 dakika kullanılmazsa uyku moduna geçer (tasarruf için). Bu yüzden siteye girince tekrar uyanması yaklaşık 50 saniye süreceğinden ona göre test etmenizi belirtmek isteriz.
+
 ---
